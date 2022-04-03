@@ -23,40 +23,6 @@ before_script:
  - echo "started by ${GITLAB_USER_NAME}"
 
 #-----------------------------------------------------------------------#
-# Linux (AppImage) 32-bit Build Target                                  #
-#-----------------------------------------------------------------------#
-"Linux 32":
-  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:buster-32
-  stage: build
-  script:
-  - export QT_SELECT=qt5
-  - export $(dpkg-architecture)
-  - ./scripts/scripts_build-plugin.sh
-  
-  artifacts:
-    name: "${CI_PROJECT_NAME}_Linux_32_${CI_COMMIT_SHORT_SHA}"
-    paths:
-    - ./libOpenRGBSamplePlugin.so.1.0.0
-    expire_in: 30 days
-
-#-----------------------------------------------------------------------#
-# Linux 64-bit Build Target                                             #
-#-----------------------------------------------------------------------#
-"Linux 64":
-  image: registry.gitlab.com/openrgbdevelopers/openrgb-linux-ci-deb-builder:buster-64
-  stage: build
-  script:
-  - export QT_SELECT=qt5
-  - export $(dpkg-architecture)
-  - ./scripts/scripts_build-plugin.sh
-  
-  artifacts:
-    name: "${CI_PROJECT_NAME}_Linux_64_${CI_COMMIT_SHORT_SHA}"
-    paths:
-    - ./libOpenRGBSamplePlugin.so.1.0.0
-    expire_in: 30 days
-
-#-----------------------------------------------------------------------#
 # Windows (32-bit) Build Target                                         #
 #-----------------------------------------------------------------------#
 "Windows 32":
@@ -124,13 +90,13 @@ before_script:
   - _fold_final_
 
   - _fold_start_ 'Preparing artifact'  
-  - mv release/OpenRGBSamplePlugin.dll ../
+  - mv release/OpenRGBFanSyncPlugin.dll ../
   - _fold_final_
 
   artifacts:
     name: "${CI_PROJECT_NAME}_Windows_32_${CI_COMMIT_SHORT_SHA}"
     paths:
-    - OpenRGBSamplePlugin.dll
+    - OpenRGBFanSyncPlugin.dll
     expire_in: 30 days
 
 #-----------------------------------------------------------------------#
@@ -203,63 +169,11 @@ before_script:
   - _fold_final_
 
   - _fold_start_ 'Preparing artifact'  
-  - mv release/OpenRGBSamplePlugin.dll ../
+  - mv release/OpenRGBFanSyncPlugin.dll ../
   - _fold_final_
 
   artifacts:
     name: "${CI_PROJECT_NAME}_Windows_64_${CI_COMMIT_SHORT_SHA}"
     paths:
-    - OpenRGBSamplePlugin.dll
+    - OpenRGBFanSyncPlugin.dll
     expire_in: 30 days
-
-#-----------------------------------------------------------------------#
-# MacOS Build Target                                                    #
-#-----------------------------------------------------------------------#
-"MacOS ARM64":
-  tags:
-  - macos
-  stage: build
-  script:
-  - eval $(/opt/homebrew/bin/brew shellenv)
-  - qmake OpenRGBSamplePlugin.pro
-  - make -j16
-  - install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /opt/homebrew/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets
-  - install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /opt/homebrew/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui
-  - install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /opt/homebrew/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore
-  - codesign --force --verify -s OpenRGB libOpenRGBSamplePlugin.1.0.0.dylib
-
-  artifacts:
-    name: "${CI_PROJECT_NAME}_MacOS_ARM64_${CI_COMMIT_SHORT_SHA}"
-    paths:
-    - libOpenRGBSamplePlugin.1.0.0.dylib
-    expire_in: 30 days
-
-  rules:
-  - if: '$CI_PROJECT_PATH == "OpenRGBDevelopers/OpenRGBSamplePlugin"'
-    when: on_success
-  - if: '$BUILD_MACOS =~ /.+/'
-    when: on_success
-
-"MacOS Intel":
-  tags:
-  - macos
-  stage: build
-  script:
-  - eval $(/usr/local/bin/brew shellenv)
-  - arch -x86_64 /usr/local/bin/qmake OpenRGBSamplePlugin.pro
-  - arch -x86_64 make -j16
-  - arch -x86_64 install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /usr/local/bin/opt/qt@5/lib/QtWidgets.framework/Versions/5/QtWidgets @executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets
-  - arch -x86_64 install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /usr/local/bin/opt/qt@5/lib/QtGui.framework/Versions/5/QtGui @executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui
-  - arch -x86_64 install_name_tool libOpenRGBSamplePlugin.1.0.0.dylib -change /usr/local/bin/opt/qt@5/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore
-  - arch -x86_64 codesign --force --verify -s OpenRGB libOpenRGBSamplePlugin.1.0.0.dylib
-  artifacts:
-    name: "${CI_PROJECT_NAME}_MacOS_Intel_${CI_COMMIT_SHORT_SHA}"
-    paths:
-    - libOpenRGBSamplePlugin.1.0.0.dylib
-    expire_in: 30 days
-
-  rules:
-  - if: '$CI_PROJECT_PATH == "OpenRGBDevelopers/OpenRGBSamplePlugin"'
-    when: on_success
-  - if: '$BUILD_MACOS =~ /.+/'
-    when: on_success

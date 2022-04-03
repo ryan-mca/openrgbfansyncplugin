@@ -6,7 +6,7 @@ QT +=                  \
 win32:CONFIG += QTPLUGIN
 
 TEMPLATE = lib
-DEFINES += ORGBSAMPLEPLUGIN_LIBRARY
+DEFINES += ORGBFANSYNCPLUGIN_LIBRARY
 
 win32:CONFIG += c++17
 
@@ -50,12 +50,14 @@ INCLUDEPATH +=                                                                  
     OpenRGB/dependencies/json                                                                   \
 
 HEADERS +=                                                                                      \
+    MainWindow.h \
     OpenRGB/OpenRGBPluginInterface.h                                                            \
     OpenRGB/ResourceManager.h                                                                   \
-    OpenRGBSamplePlugin.h                                                                       \
+    OpenRGBFanSyncPlugin.h
 
 SOURCES +=                                                                                      \
-    OpenRGBSamplePlugin.cpp                                                                     \
+    MainWindow.cpp \
+    OpenRGBFanSyncPlugin.cpp
 
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #
@@ -91,22 +93,6 @@ win32:DEFINES +=                                                        \
     _CRT_SECURE_NO_WARNINGS                                             \
     _WINSOCK_DEPRECATED_NO_WARNINGS                                     \
     WIN32_LEAN_AND_MEAN                                                 \
-
-#-----------------------------------------------------------------------#
-# Linux-specific Configuration                                          #
-#-----------------------------------------------------------------------#
-unix:!macx {
-}
-
-#-----------------------------------------------------------------------#
-# MacOS-specific Configuration                                          #
-#-----------------------------------------------------------------------#
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
-
-macx: {
-    CONFIG += c++17
-}
-
 
 RESOURCES += \
     resources.qrc

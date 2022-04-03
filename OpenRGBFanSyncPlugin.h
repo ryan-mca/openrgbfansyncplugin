@@ -1,5 +1,5 @@
-#ifndef OPENRGBSAMPLEPLUGIN_H
-#define OPENRGBSAMPLEPLUGIN_H
+#ifndef OPENRGBFANSYNCPLUGIN_H
+#define OPENRGBFANSYNCPLUGIN_H
 
 #include "OpenRGBPluginInterface.h"
 #include "ResourceManager.h"
@@ -9,15 +9,18 @@
 #include <QtPlugin>
 #include <QWidget>
 
-class OpenRGBSamplePlugin : public QObject, public OpenRGBPluginInterface
+class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID OpenRGBPluginInterface_IID)
     Q_INTERFACES(OpenRGBPluginInterface)
 
+private:
+    QWidget* widget;
+
 public:
-    OpenRGBSamplePlugin();
-    ~OpenRGBSamplePlugin();
+    OpenRGBFanSyncPlugin();
+    ~OpenRGBFanSyncPlugin();
 
     OpenRGBPluginInfo   GetPluginInfo() override;
     unsigned int        GetPluginAPIVersion() override;
@@ -28,12 +31,9 @@ public:
     void                Unload() override;
 
 
-//    OpenRGBPluginInfo       PInfo;
-//    OpenRGBPluginInfo       Initialize(bool, ResourceManager*)   override;
-//    QWidget*                CreateGUI(QWidget *Parent)           override;
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
 
 };
 
-#endif // OPENRGBSAMPLEPLUGIN_H
+#endif // OPENRGBFANSYNCPLUGIN_H
