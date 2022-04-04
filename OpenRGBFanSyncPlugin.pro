@@ -48,16 +48,25 @@ INCLUDEPATH +=                                                                  
     OpenRGB/RGBController                                                                       \
     OpenRGB/net_port                                                                            \
     OpenRGB/dependencies/json                                                                   \
+    dependencies/exprtk                                                                         \
 
 HEADERS +=                                                                                      \
-    MainWindow.h \
+    FanSyncPage.h \
     OpenRGB/OpenRGBPluginInterface.h                                                            \
     OpenRGB/ResourceManager.h                                                                   \
-    OpenRGBFanSyncPlugin.h
+    OpenRGB/qt/TabLabel.h                                                                       \
+    dependencies/exprtk/exprtk.hpp                                                              \
+    OpenRGBFanSyncPlugin.h                                                                      \
+    FanSyncWidget.h                                                                             \
 
 SOURCES +=                                                                                      \
-    MainWindow.cpp \
-    OpenRGBFanSyncPlugin.cpp
+    FanSyncPage.cpp \
+    FanSyncWidget.cpp                                                                           \
+    OpenRGBFanSyncPlugin.cpp                                                                    \
+    OpenRGB/qt/TabLabel.cpp                                                                     \
+
+FORMS +=                                                                                        \
+    OpenRGB/qt/TabLabel.ui                                                                      \
 
 #-------------------------------------------------------------------#
 # Windows GitLab CI Configuration                                   #
@@ -93,6 +102,21 @@ win32:DEFINES +=                                                        \
     _CRT_SECURE_NO_WARNINGS                                             \
     _WINSOCK_DEPRECATED_NO_WARNINGS                                     \
     WIN32_LEAN_AND_MEAN                                                 \
+
+win32:{
+    INCLUDEPATH += dependencies/lhwm-cpp-wrapper
+    DEPENDPATH += dependencies/lhwm-cpp-wrapper
+    HEADERS += dependencies/lhwm-cpp-wrapper/lhwm-cpp-wrapper.h
+}
+
+win32:CONFIG(debug, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
+    LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Debug -llhwm-cpp-wrapper
+}
+
+win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
+    LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Release -llhwm-cpp-wrapper
+}
+
 
 RESOURCES += \
     resources.qrc

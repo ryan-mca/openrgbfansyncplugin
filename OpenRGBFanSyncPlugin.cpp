@@ -1,5 +1,4 @@
 #include "OpenRGBFanSyncPlugin.h"
-#include "MainWindow.h"
 
 bool OpenRGBFanSyncPlugin::DarkTheme = false;
 ResourceManager* OpenRGBFanSyncPlugin::RMPointer = nullptr;
@@ -44,30 +43,52 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
 {
     printf("[OpenRGBFanSyncPlugin] Creating widget.\n");
 
-    return widget;
+    bool can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
+
+    if (can_load)
+    {
+        MainWidget = new FanSyncWidget(nullptr);
+        return MainWidget;
+    }
+    else
+    {
+        QLabel* label = new QLabel(
+                        "<h1>Cannot load the plugin.</h1>"
+                        "<p>Make sure you downloaded <a href=\"https://gitlab.com/ShadyNawara/openrgbfansyncplugin/-/raw/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll\">lhwm-wrapper.dll</a></p>"
+                        "<p>Place this DLL inside  <b>" + QCoreApplication::applicationDirPath() +  "</b> and restart OpenRGB.</p>"
+         );
+
+        label->setTextFormat(Qt::RichText);
+        label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        label->setOpenExternalLinks(true);
+
+        return label;
+    }
 }
 
 QMenu* OpenRGBFanSyncPlugin::GetTrayMenu()
 {
     printf("[OpenRGBFanSyncPlugin] Creating tray menu.\n");
 
-    QMenu* menu = new QMenu("Sample plugin");
+    QMenu* menu = new QMenu("Hardware Fan Sync");
 
     return menu;
 }
 
 void OpenRGBFanSyncPlugin::Unload()
 {
-    printf("[OpenRGBFanSyncPlugin] Time to call some cleaning stuff.\n");
+    if(MainWidget) {
+        delete MainWidget;
+    }
 }
 
 OpenRGBFanSyncPlugin::OpenRGBFanSyncPlugin()
 {
-    widget = new MainWindow(nullptr);
+
 }
 
 OpenRGBFanSyncPlugin::~OpenRGBFanSyncPlugin()
 {
-     delete widget;
+
 }
 

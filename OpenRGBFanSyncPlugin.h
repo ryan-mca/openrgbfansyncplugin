@@ -8,6 +8,10 @@
 #include <QString>
 #include <QtPlugin>
 #include <QWidget>
+#include <QTabWidget>
+#include <QFile>
+
+#include "FanSyncWidget.h"
 
 class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
 {
@@ -16,7 +20,7 @@ class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
     Q_INTERFACES(OpenRGBPluginInterface)
 
 private:
-    QWidget* widget;
+    FanSyncWidget* MainWidget;
 
 public:
     OpenRGBFanSyncPlugin();
