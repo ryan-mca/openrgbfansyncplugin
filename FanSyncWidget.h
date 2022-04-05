@@ -4,16 +4,16 @@
 #include <QTabBar>
 #include <QTabWidget>
 
-#include <lhwm-cpp-wrapper.h>
 #include "qt/TabLabel.h"
 
+#include "HardwareMonitor.h"
 #include "FanSyncPage.h"
 
 class FanSyncWidget : public QTabWidget
 {
     Q_OBJECT
 public:
-    explicit FanSyncWidget(QWidget *parent = nullptr);
+    FanSyncWidget(HardwareMonitor *hardwareMonitor);
 
 signals:
 

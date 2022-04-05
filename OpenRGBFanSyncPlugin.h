@@ -11,6 +11,7 @@
 #include <QTabWidget>
 #include <QFile>
 
+#include "HardwareMonitor.h"
 #include "FanSyncWidget.h"
 
 class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
@@ -20,6 +21,7 @@ class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
     Q_INTERFACES(OpenRGBPluginInterface)
 
 private:
+    HardwareMonitor* MainHardwareMonitor;
     FanSyncWidget* MainWidget;
 
 public:

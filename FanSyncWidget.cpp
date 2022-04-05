@@ -1,29 +1,18 @@
 #include "FanSyncWidget.h"
 
-FanSyncWidget::FanSyncWidget(QWidget *parent)
-    : QTabWidget{parent}
+FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor)
+    : QTabWidget{nullptr}
 {
     this->setTabPosition(QTabWidget::West);
 
-    std::map<std::string, std::vector<std::tuple<std::string, std::string, std::string>>>
-                hs_map = LHWM::GetHardwareSensorMap();
-
-    for (const auto& [HardwareName, HardwareSensors] : hs_map)
+    for (const auto& [controlIdentifier, controlName] : hardwareMonitor->ControlHardwareList)
     {
-        for (const auto& hardwareSensor : HardwareSensors)
-        {
-            if(std::get<1>(hardwareSensor) != "Control")
-            {
-                continue;
-            }
-
-            QWidget *page = new FanSyncPage();
+            QWidget *page = new FanSyncPage(controlIdentifier, hardwareMonitor);
             this->addTab(page, "");
 
-            QString labelString = QString::fromStdString(std::get<0>(hardwareSensor));
+            QString labelString = QString::fromStdString(controlName);
             Ui::TabLabel* tabLabel = new Ui::TabLabel("fan", labelString);
 
             this->tabBar()->setTabButton(this->tabBar()->count() - 1, QTabBar::LeftSide, tabLabel);
-        }
     }
 }

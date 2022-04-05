@@ -52,6 +52,7 @@ INCLUDEPATH +=                                                                  
 
 HEADERS +=                                                                                      \
     FanSyncPage.h \
+    HardwareMonitor.h \
     OpenRGB/OpenRGBPluginInterface.h                                                            \
     OpenRGB/ResourceManager.h                                                                   \
     OpenRGB/qt/TabLabel.h                                                                       \
@@ -62,6 +63,7 @@ HEADERS +=                                                                      
 SOURCES +=                                                                                      \
     FanSyncPage.cpp \
     FanSyncWidget.cpp                                                                           \
+    HardwareMonitor.cpp \
     OpenRGBFanSyncPlugin.cpp                                                                    \
     OpenRGB/qt/TabLabel.cpp                                                                     \
 

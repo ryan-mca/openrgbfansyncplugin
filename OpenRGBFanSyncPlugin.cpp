@@ -47,7 +47,8 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
 
     if (can_load)
     {
-        MainWidget = new FanSyncWidget(nullptr);
+        MainHardwareMonitor = new HardwareMonitor();
+        MainWidget = new FanSyncWidget(MainHardwareMonitor);
         return MainWidget;
     }
     else
@@ -77,8 +78,14 @@ QMenu* OpenRGBFanSyncPlugin::GetTrayMenu()
 
 void OpenRGBFanSyncPlugin::Unload()
 {
-    if(MainWidget) {
+    if(MainWidget)
+    {
         delete MainWidget;
+    }
+
+    if(MainHardwareMonitor)
+    {
+        delete MainHardwareMonitor;
     }
 }
 

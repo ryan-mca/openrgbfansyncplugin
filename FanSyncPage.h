@@ -4,12 +4,17 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QComboBox>
+#include <QPushButton>
+#include <QPlainTextEdit>
+
+#include "HardwareMonitor.h"
 
 class FanSyncPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FanSyncPage(QWidget *parent = nullptr);
+    FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwareMonitor);
 
 signals:
 
