@@ -48,5 +48,9 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
         measureFunctionText->appendPlainText("{{" + sensorDropdown->currentData().toString() + "}}");
     });
 
+    // Fan Curve
 
+    FanCurvePlotWidget* fanCurveWidget = new FanCurvePlotWidget();
+
+    layout->addWidget(fanCurveWidget, 5);
 }

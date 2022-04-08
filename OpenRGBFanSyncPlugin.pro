@@ -2,6 +2,7 @@ QT +=                  \
     gui                \
     widgets            \
     core               \
+    printsupport       \
 
 win32:CONFIG += QTPLUGIN
 
@@ -49,23 +50,28 @@ INCLUDEPATH +=                                                                  
     OpenRGB/net_port                                                                            \
     OpenRGB/dependencies/json                                                                   \
     dependencies/exprtk                                                                         \
+    dependencies/qcustomplot                                                                    \
 
 HEADERS +=                                                                                      \
+    FanCurvePlotWidget.h \
     FanSyncPage.h \
     HardwareMonitor.h \
     OpenRGB/OpenRGBPluginInterface.h                                                            \
     OpenRGB/ResourceManager.h                                                                   \
     OpenRGB/qt/TabLabel.h                                                                       \
     dependencies/exprtk/exprtk.hpp                                                              \
+    dependencies/qcustomplot/qcustomplot.h                                                      \
     OpenRGBFanSyncPlugin.h                                                                      \
     FanSyncWidget.h                                                                             \
 
 SOURCES +=                                                                                      \
+    FanCurvePlotWidget.cpp \
     FanSyncPage.cpp \
     FanSyncWidget.cpp                                                                           \
     HardwareMonitor.cpp \
     OpenRGBFanSyncPlugin.cpp                                                                    \
     OpenRGB/qt/TabLabel.cpp                                                                     \
+    dependencies/qcustomplot/qcustomplot.cpp                                                    \
 
 FORMS +=                                                                                        \
     OpenRGB/qt/TabLabel.ui                                                                      \

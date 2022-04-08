@@ -9,14 +9,13 @@
 #include <QPlainTextEdit>
 
 #include "HardwareMonitor.h"
+#include "FanCurvePlotWidget.h"
 
 class FanSyncPage : public QWidget
 {
     Q_OBJECT
 public:
     FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwareMonitor);
-
-signals:
 
 };
 
