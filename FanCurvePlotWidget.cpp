@@ -1,3 +1,13 @@
+/*
+    Major portions of this file were adapted from TuxClocker (editprofile.h).
+
+    https://github.com/Lurkki14/tuxclocker/blob/master/editprofile.h
+
+    Copyright (c) 2019 Jussi Kuokkanen
+
+    Modified by Shady Nawara, 2022
+*/
+
 #include "FanCurvePlotWidget.h"
 
 FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
@@ -55,11 +65,7 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     fanCurve->xAxis->setBasePen(tickPen);
     fanCurve->yAxis->setBasePen(tickPen);
 
-    fanCurve->xAxis->setLabel("Measure Function");
-    fanCurve->yAxis->setLabel("Fan speed (%)");
 
-    fanCurve->xAxis->setRange(x_lower, (x_upper+5));
-    fanCurve->yAxis->setRange(y_lower, (y_upper+10));
 
     connect(fanCurve, SIGNAL(mouseDoubleClick(QMouseEvent*)), SLOT(clickedGraph(QMouseEvent*)));
     connect(fanCurve, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), SLOT(clickedPoint(QCPAbstractPlottable*,int,QMouseEvent*)));
@@ -69,17 +75,10 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     connect(fanCurve, SIGNAL(mouseMove(QMouseEvent*)), SLOT(getClosestCoords(QMouseEvent*)));
     connect(fanCurve, SIGNAL(mouseMove(QMouseEvent*)), SLOT(drawPointHoveredText(QMouseEvent*)));
 
-
     qv_x.append(0);
     qv_y.append(0);
 
-    qv_x.append(20);
-    qv_y.append(0);
-
-    qv_x.append(60);
-    qv_y.append(80);
-
-    qv_x.append(100);
+    qv_x.append(0);
     qv_y.append(100);
 
     fanCurve->graph(0)->setData(qv_x, qv_y);
@@ -88,7 +87,6 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     QCPItemText *text = new QCPItemText(fanCurve);
     coordText = text;
     coordText->setColor(textColor);
-
 }
 
 void FanCurvePlotWidget::rePlot()
@@ -144,7 +142,6 @@ void FanCurvePlotWidget::clickedPoint(QCPAbstractPlottable*, int, QMouseEvent *e
       rePlot();
       drawFillerLines();
     }
-
 }
 
 bool FanCurvePlotWidget::checkForNearbyPoints(QMouseEvent *event)
@@ -347,4 +344,35 @@ void FanCurvePlotWidget::detectRelease(QMouseEvent*)
     draggingPoint = false;
     coordText->setText("");
     rePlot();
+}
+
+void FanCurvePlotWidget::setXAxisRange(int min, int max, int maxMargin)
+{
+    fanCurve->xAxis->setRange(min, max + maxMargin);
+    x_lower = min;
+    x_upper = max;
+}
+
+void FanCurvePlotWidget::setYAxisRange(int min, int max, int maxMargin)
+{
+    fanCurve->yAxis->setRange(min, max + maxMargin);
+    y_lower = min;
+    y_upper = max;
+}
+
+void FanCurvePlotWidget::setXAxisLabel(QString& text)
+{
+    fanCurve->xAxis->setLabel(text);
+}
+
+void FanCurvePlotWidget::setYAxisLabel(QString& text)
+{
+    fanCurve->yAxis->setLabel(text);
+}
+
+void FanCurvePlotWidget::updateData()
+{
+    fanCurve->graph(0)->setData(qv_x, qv_y);
+    rePlot();
+    drawFillerLines();
 }
