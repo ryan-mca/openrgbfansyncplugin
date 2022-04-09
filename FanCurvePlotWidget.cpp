@@ -78,8 +78,14 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     qv_x.append(0);
     qv_y.append(0);
 
-    qv_x.append(0);
+    qv_x.append(100);
     qv_y.append(100);
+
+    fanCurve->xAxis->setRange(x_lower, x_upper + 5);
+    fanCurve->yAxis->setRange(y_lower, y_upper + 10);
+
+    fanCurve->xAxis->setLabel("Measure Value");
+    fanCurve->yAxis->setLabel("Fan speed (%)");
 
     fanCurve->graph(0)->setData(qv_x, qv_y);
     drawFillerLines();

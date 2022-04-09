@@ -17,6 +17,15 @@ class FanSyncPage : public QWidget
 public:
     FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwareMonitor);
 
+private:
+    QComboBox *sensorDropdown;
+    QPlainTextEdit *measureFunctionText;
+    QLabel *selectedSensorValueLabel;
+    QLabel *measureFunctionResultLabel;
+    QLineEdit *minValueText;
+    QLineEdit *maxValueText;
+
+    QButtonGroup *fanPresetButtonGroup;
 };
 
 #endif // FANSYNCPAGE_H

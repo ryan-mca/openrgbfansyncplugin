@@ -4,20 +4,21 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
     : QWidget{nullptr}
 {
     // main v layout
-    QVBoxLayout *layout = new QVBoxLayout();
-    this->setLayout(layout);
+    QVBoxLayout *mainLayout = new QVBoxLayout();
+    this->setLayout(mainLayout);
 
     // first instruction lines
     QLabel *instructions = new QLabel("Add a measurement from the dropdown below then format the measurement function as required.\n"
                                       "Most Mathmatical expressions are supported, example: \"({{cputemp}} + {{gputemp}}) / 2\".\n"
                                       "See: http://www.partow.net/programming/exprtk/ for more info.");
-
-    layout->addWidget(instructions, 1);
+    QFont instructionsFont( "Arial", 6);
+    instructions->setFont(instructionsFont);
+    mainLayout->addWidget(instructions);
 
     // hardware measures
     QHBoxLayout *hardwareDropdownLayout = new QHBoxLayout();
 
-    QComboBox *sensorDropdown = new QComboBox();
+    sensorDropdown = new QComboBox();
 
     for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->SensorList)
     {
@@ -28,16 +29,24 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
 
     hardwareDropdownLayout->addWidget(sensorDropdown, 3);
 
+    selectedSensorValueLabel = new QLabel("(20 C)");
+    hardwareDropdownLayout->addWidget(selectedSensorValueLabel);
+
     QPushButton *addSensorButton = new QPushButton("Add");
     hardwareDropdownLayout->addWidget(addSensorButton, 1);
 
-    layout->addLayout(hardwareDropdownLayout, 1);
+//    QLabel *instructionsToolTipLabel = new QLabel("i");
+//    instructionsToolTipLabel->setToolTip("Add a measurement from the dropdown on the left then format the measurement function as required.\n"
+//                                         "Most Mathmatical expressions are supported, example: \"({{cputemp}} + {{gputemp}}) / 2\".\n"
+//                                         "See: http://www.partow.net/programming/exprtk/ for more info.");
+//    hardwareDropdownLayout->addWidget(instructionsToolTipLabel);
+
+    mainLayout->addLayout(hardwareDropdownLayout);
 
 
     // measure function textbox
-    QPlainTextEdit *measureFunctionText = new QPlainTextEdit();
-
-    layout->addWidget(measureFunctionText, 2);
+    measureFunctionText = new QPlainTextEdit();
+    mainLayout->addWidget(measureFunctionText, 2);
 
     // add sensor button action
     QObject::connect(addSensorButton, &QPushButton::clicked, addSensorButton, [=]() {
@@ -48,9 +57,74 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
         measureFunctionText->appendPlainText("{{" + sensorDropdown->currentData().toString() + "}}");
     });
 
+    // set min max
+    QHBoxLayout *minMaxLayout = new QHBoxLayout();
+
+    measureFunctionResultLabel = new QLabel("Current Value: 0");
+    minMaxLayout->addWidget(measureFunctionResultLabel);
+
+    minMaxLayout->addStretch();
+
+    QValidator *intValidator = new QIntValidator(this);
+
+    QLabel *minLabel = new QLabel("Min: ");
+    minLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    minValueText = new QLineEdit("0");
+    minValueText->setValidator(intValidator);
+    minValueText->setFixedWidth(60);
+    minMaxLayout->addWidget(minLabel);
+    minMaxLayout->addWidget(minValueText);
+
+    QLabel *maxLabel = new QLabel("Max: ");
+    maxLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    maxValueText = new QLineEdit("100");
+    maxValueText->setValidator(intValidator);
+    maxValueText->setFixedWidth(60);
+    minMaxLayout->addWidget(maxLabel);
+    minMaxLayout->addWidget(maxValueText);
+
+    mainLayout->addLayout(minMaxLayout);
+
     // Fan Curve
+    FanCurvePlotWidget *fanCurveWidget = new FanCurvePlotWidget();
+    mainLayout->addWidget(fanCurveWidget, 4);
 
-    FanCurvePlotWidget* fanCurveWidget = new FanCurvePlotWidget();
+    // Fan Presets
+    QHBoxLayout *fanPresetLayout = new QHBoxLayout();
 
-    layout->addWidget(fanCurveWidget, 5);
+    fanPresetButtonGroup = new QButtonGroup();
+
+    QRadioButton* customPresetButton = new QRadioButton("Custom");
+    QRadioButton* silentPresetButton = new QRadioButton("Silent");
+    QRadioButton* normalPresetButton = new QRadioButton("Normal");
+    QRadioButton* performancePresetButton = new QRadioButton("Performance");
+
+    fanPresetButtonGroup->addButton(customPresetButton, 1);
+    fanPresetButtonGroup->addButton(silentPresetButton, 2);
+    fanPresetButtonGroup->addButton(normalPresetButton, 3);
+    fanPresetButtonGroup->addButton(performancePresetButton, 4);
+
+    customPresetButton->setChecked(true);
+
+    QLabel *fanPresetLabel = new QLabel("Preset: ");
+    fanPresetLayout->addWidget(fanPresetLabel);
+
+    fanPresetLayout->addWidget(customPresetButton);
+    fanPresetLayout->addWidget(silentPresetButton);
+    fanPresetLayout->addWidget(normalPresetButton);
+    fanPresetLayout->addWidget(performancePresetButton);
+
+    mainLayout->addLayout(fanPresetLayout);
+
+    // Action buttons
+    QHBoxLayout *actionButtonsLayout = new QHBoxLayout();
+    actionButtonsLayout->addStretch();
+
+    QPushButton *resetButton = new QPushButton("Reset");
+    actionButtonsLayout->addWidget(resetButton);
+
+    QPushButton *saveButton = new QPushButton("Save");
+    actionButtonsLayout->addWidget(saveButton);
+
+    mainLayout->addLayout(actionButtonsLayout);
 }
