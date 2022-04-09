@@ -29,7 +29,7 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
 
     hardwareDropdownLayout->addWidget(sensorDropdown, 3);
 
-    selectedSensorValueLabel = new QLabel("(20 C)");
+    selectedSensorValueLabel = new QLabel("()");
     hardwareDropdownLayout->addWidget(selectedSensorValueLabel);
 
     QPushButton *addSensorButton = new QPushButton("Add");

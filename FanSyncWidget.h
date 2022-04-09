@@ -15,7 +15,8 @@ class FanSyncWidget : public QTabWidget
 public:
     FanSyncWidget(HardwareMonitor *hardwareMonitor);
 
-signals:
+private:
+    QList<std::string> hiddenControls;
 
 };
 
