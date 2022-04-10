@@ -2,11 +2,17 @@
 #define HARDWAREMONITOR_H
 
 #include <QString>
+#include <QTimer>
+#include <unordered_set>
 
 #include <lhwm-cpp-wrapper.h>
 
-class HardwareMonitor
+class HardwareMonitor : public QObject
 {
+Q_OBJECT
+private:
+    QTimer *updateTimer;
+
 public:
     /// <summary>
     /// A list of control devices detect [identifier, name]
@@ -19,15 +25,25 @@ public:
     std::map<std::string, std::string> SensorList;
 
     /// <summary>
-    /// A list of all sensors and their values [identifier, value]
+    /// A list of enabled sensors and their values [identifier, value]
     /// </summary>
-    std::map<std::string, double> SensorValues;
+    std::map<std::string, double> SensorValue;
 
-    /// <summary>
-    /// A list of which sensors are in use
-    /// only enabled sensors would be updated
-    /// </summary>
-    std::map<std::string, bool> SensorEnabled;
+    ///
+    /// \brief updated the value for all key present in the SensorValue map
+    ///
+    void updateValues();
+
+    ///
+    /// \brief startAutoUpdate
+    /// \param intervalMs optional time interal in milliseconds (default: 1000 ms)
+    ///
+    void startAutoUpdate(int intervalMs = 1000);
+
+    ///
+    /// \brief stopAutoUpdate stops the auto update timer
+    ///
+    void stopAutoUpdate();
 
     HardwareMonitor();
 };

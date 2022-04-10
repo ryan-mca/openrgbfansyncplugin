@@ -48,6 +48,13 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
     if (can_load)
     {
         MainHardwareMonitor = new HardwareMonitor();
+        MainHardwareMonitor->moveToThread(&workerThread);
+        connect(&workerThread, &QThread::finished, MainHardwareMonitor, &QObject::deleteLater);
+        connect(this, &OpenRGBFanSyncPlugin::autoUpdateHardwareMonitor, MainHardwareMonitor, &HardwareMonitor::startAutoUpdate);
+        workerThread.start();
+
+        emit autoUpdateHardwareMonitor(1000);
+
         MainWidget = new FanSyncWidget(MainHardwareMonitor);
         return MainWidget;
     }
@@ -78,15 +85,8 @@ QMenu* OpenRGBFanSyncPlugin::GetTrayMenu()
 
 void OpenRGBFanSyncPlugin::Unload()
 {
-    if(MainWidget)
-    {
-        delete MainWidget;
-    }
-
-    if(MainHardwareMonitor)
-    {
-        delete MainHardwareMonitor;
-    }
+    workerThread.quit();
+    workerThread.wait();
 }
 
 OpenRGBFanSyncPlugin::OpenRGBFanSyncPlugin()

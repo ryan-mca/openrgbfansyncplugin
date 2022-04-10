@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QTabWidget>
 #include <QFile>
+#include <QThread>
 
 #include "HardwareMonitor.h"
 #include "FanSyncWidget.h"
@@ -23,6 +24,7 @@ class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
 private:
     HardwareMonitor* MainHardwareMonitor;
     FanSyncWidget* MainWidget;
+    QThread workerThread;
 
 public:
     OpenRGBFanSyncPlugin();
@@ -39,6 +41,9 @@ public:
 
     static bool             DarkTheme;
     static ResourceManager* RMPointer;
+
+signals:
+    void autoUpdateHardwareMonitor(const int &);
 
 };
 

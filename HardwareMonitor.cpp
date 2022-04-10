@@ -14,17 +14,39 @@ HardwareMonitor::HardwareMonitor()
             if(std::get<1>(hardwareSensor) == "Control")
             {
                 ControlHardwareList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
-                SensorEnabled[std::get<2>(hardwareSensor)] = true; // control sensors are enabled by default
             }
             else
             {
                 SensorList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
-                SensorEnabled[std::get<2>(hardwareSensor)] = false; // control sensors are disabled by default
             }
-
-            SensorValues[std::get<2>(hardwareSensor)] = 0;
         }
     }
-
-
 }
+
+void HardwareMonitor::updateValues()
+{
+    for(auto& sensor : SensorValue)
+    {
+        sensor.second = LHWM::GetSensorValue(sensor.first);
+    }
+}
+
+void HardwareMonitor::startAutoUpdate(int intervalMs)
+{
+    if(updateTimer)
+    {
+        updateTimer = new QTimer();
+        QObject::connect(updateTimer, &QTimer::timeout, this, QOverload<>::of(&HardwareMonitor::updateValues));
+        updateTimer->start(intervalMs);
+    }
+}
+
+void HardwareMonitor::stopAutoUpdate()
+{
+    if(updateTimer)
+    {
+        updateTimer->stop();
+        delete updateTimer;
+    }
+}
+
