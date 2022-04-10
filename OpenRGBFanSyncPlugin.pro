@@ -6,6 +6,8 @@ QT +=                  \
 
 win32:CONFIG += QTPLUGIN
 
+QMAKE_CXXFLAGS += /bigobj
+
 TEMPLATE = lib
 DEFINES += ORGBFANSYNCPLUGIN_LIBRARY
 

@@ -22,8 +22,8 @@ class OpenRGBFanSyncPlugin : public QObject, public OpenRGBPluginInterface
     Q_INTERFACES(OpenRGBPluginInterface)
 
 private:
-    HardwareMonitor* MainHardwareMonitor;
-    FanSyncWidget* MainWidget;
+    HardwareMonitor* hardwareMonitor;
+    FanSyncWidget* mainWidget;
     QThread workerThread;
 
 public:

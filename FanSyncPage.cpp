@@ -1,8 +1,11 @@
 #include "FanSyncPage.h"
 
-FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwareMonitor)
-    : QWidget{nullptr}
+FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWidget *parent)
+    : QWidget{parent}
 {
+    controlIdentifier = cIdentifier;
+    hardwareMonitor = hMonitor;
+
     // main v layout
     QVBoxLayout *mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
@@ -20,7 +23,7 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
 
     sensorDropdown = new QComboBox();
 
-    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->SensorList)
+    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->sensorList)
     {
         QString sensorIdentifierQstring = QString::fromStdString(sensorIdentifier);
         QString sensorNameQstring = QString::fromStdString(sensorName);
@@ -49,7 +52,7 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
     mainLayout->addWidget(measureFunctionText, 2);
 
     // add sensor button action
-    QObject::connect(addSensorButton, &QPushButton::clicked, addSensorButton, [=]() {
+    QObject::connect(addSensorButton, &QPushButton::clicked, addSensorButton, [this]() {
         if (sensorDropdown->currentIndex() == -1)
         {
             return;
@@ -127,4 +130,36 @@ FanSyncPage::FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwar
     actionButtonsLayout->addWidget(saveButton);
 
     mainLayout->addLayout(actionButtonsLayout);
+
+    connect(saveButton, &QPushButton::released, this, &FanSyncPage::updateControl);
+
 }
+
+void FanSyncPage::updateControl()
+{
+    typedef exprtk::symbol_table<float> symbol_table_t;
+    typedef exprtk::expression<float>   expression_t;
+    typedef exprtk::parser<float>       parser_t;
+
+    std::string expression_string = measureFunctionText->toPlainText().toStdString();
+
+    float x;
+
+    symbol_table_t symbol_table;
+    symbol_table.add_variable("{{xe}}",x);
+    symbol_table.add_constants();
+
+    expression_t expression;
+    expression.register_symbol_table(symbol_table);
+
+    parser_t parser;
+    parser.compile(expression_string,expression);
+
+    for (x = float(-5); x <= float(+5); x += float(1))
+    {
+       float y = expression.value();
+       printf("%19.15f\t%19.15f\n",x,y);
+    }
+}
+
+

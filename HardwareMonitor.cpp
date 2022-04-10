@@ -13,22 +13,25 @@ HardwareMonitor::HardwareMonitor()
         {
             if(std::get<1>(hardwareSensor) == "Control")
             {
-                ControlHardwareList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
+                controlHardwareList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
+                sensorValue[std::get<2>(hardwareSensor)] = 0;
             }
             else
             {
-                SensorList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
+                sensorList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
             }
         }
     }
 }
 
-void HardwareMonitor::updateValues()
+void HardwareMonitor::updateSensors()
 {
-    for(auto& sensor : SensorValue)
+    for(auto& sensor : sensorValue)
     {
         sensor.second = LHWM::GetSensorValue(sensor.first);
     }
+
+    emit sensorsUpdated();
 }
 
 void HardwareMonitor::startAutoUpdate(int intervalMs)
@@ -36,7 +39,7 @@ void HardwareMonitor::startAutoUpdate(int intervalMs)
     if(updateTimer)
     {
         updateTimer = new QTimer();
-        QObject::connect(updateTimer, &QTimer::timeout, this, QOverload<>::of(&HardwareMonitor::updateValues));
+        QObject::connect(updateTimer, &QTimer::timeout, this, QOverload<>::of(&HardwareMonitor::updateSensors));
         updateTimer->start(intervalMs);
     }
 }
@@ -50,3 +53,10 @@ void HardwareMonitor::stopAutoUpdate()
     }
 }
 
+void HardwareMonitor::setControlValue(std::string identifier, float value)
+{
+    if (sensorValue[identifier] != value || value == 0)
+    {
+        LHWM::SetControlValue(identifier, value);
+    }
+}

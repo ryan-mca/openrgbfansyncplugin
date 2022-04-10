@@ -17,22 +17,22 @@ public:
     /// <summary>
     /// A list of control devices detect [identifier, name]
     /// </summary>
-    std::map<std::string, std::string> ControlHardwareList;
+    std::map<std::string, std::string> controlHardwareList;
 
     /// <summary>
     /// A list of sensors detected [identifier, name]
     /// </summary>
-    std::map<std::string, std::string> SensorList;
+    std::map<std::string, std::string> sensorList;
 
     /// <summary>
     /// A list of enabled sensors and their values [identifier, value]
     /// </summary>
-    std::map<std::string, double> SensorValue;
+    std::map<std::string, float> sensorValue;
 
     ///
     /// \brief updated the value for all key present in the SensorValue map
     ///
-    void updateValues();
+    void updateSensors();
 
     ///
     /// \brief startAutoUpdate
@@ -45,7 +45,24 @@ public:
     ///
     void stopAutoUpdate();
 
+    ///
+    /// \brief setControlValue sets the value of the control device (i.e fan speed)
+    /// \param identifier control identifier
+    /// \param value new control value
+    ///
+    void setControlValue(std::string identifier, float value);
+
+    ///
+    /// \brief HardwareMonitor responsible for communicating with the lhwm wrapper
+    ///
     HardwareMonitor();
+
+signals:
+    ///
+    /// \brief sensorsUpdated signal is emitted whenever the sensors are updated (through updateSensors())
+    ///
+    void sensorsUpdated();
+
 };
 
 #endif // HARDWAREMONITOR_H

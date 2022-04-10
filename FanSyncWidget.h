@@ -13,10 +13,13 @@ class FanSyncWidget : public QTabWidget
 {
     Q_OBJECT
 public:
-    FanSyncWidget(HardwareMonitor *hardwareMonitor);
+    FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent = nullptr);
 
 private:
     QList<std::string> hiddenControls;
+
+private slots:
+    void tabBarContextMenuRequested(const QPoint& pos);
 
 };
 

@@ -47,16 +47,21 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
 
     if (can_load)
     {
-        MainHardwareMonitor = new HardwareMonitor();
-        MainHardwareMonitor->moveToThread(&workerThread);
-        connect(&workerThread, &QThread::finished, MainHardwareMonitor, &QObject::deleteLater);
-        connect(this, &OpenRGBFanSyncPlugin::autoUpdateHardwareMonitor, MainHardwareMonitor, &HardwareMonitor::startAutoUpdate);
+        hardwareMonitor = new HardwareMonitor();
+        mainWidget = new FanSyncWidget(hardwareMonitor);
+
+        hardwareMonitor->moveToThread(&workerThread);
+        mainWidget->moveToThread(&workerThread);
+
+        connect(&workerThread, &QThread::finished, hardwareMonitor, &QObject::deleteLater);
+        connect(&workerThread, &QThread::finished, mainWidget, &QObject::deleteLater);
+
+        connect(this, &OpenRGBFanSyncPlugin::autoUpdateHardwareMonitor, hardwareMonitor, &HardwareMonitor::startAutoUpdate);
         workerThread.start();
 
         emit autoUpdateHardwareMonitor(1000);
 
-        MainWidget = new FanSyncWidget(MainHardwareMonitor);
-        return MainWidget;
+        return mainWidget;
     }
     else
     {
