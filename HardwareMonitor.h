@@ -25,6 +25,11 @@ public:
     std::map<std::string, std::string> sensorList;
 
     /// <summary>
+    /// A list of sensors detected [identifier, name]
+    /// </summary>
+    std::map<std::string, std::map<std::string, std::map<std::string, std::string>>> sensorListHierarchy;
+
+    /// <summary>
     /// A list of enabled sensors and their values [identifier, value]
     /// </summary>
     std::map<std::string, float> sensorValue;

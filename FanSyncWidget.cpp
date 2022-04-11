@@ -1,17 +1,20 @@
 #include "FanSyncWidget.h"
 
-FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent)
+FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, bool darkTheme, QWidget *parent)
     : QTabWidget{parent}
 {
     this->setTabPosition(QTabWidget::West);
 
     for (const auto& [controlIdentifier, controlName] : hardwareMonitor->controlHardwareList)
     {
-            QWidget *page = new FanSyncPage(controlIdentifier, hardwareMonitor);
+            FanSyncPage *page = new FanSyncPage(controlIdentifier, hardwareMonitor);
+
+            QObject::connect(hardwareMonitor, &HardwareMonitor::sensorsUpdated, page, &FanSyncPage::updateControl);
+
             this->addTab(page, "");
 
             QString labelString = QString::fromStdString(controlName);
-            Ui::TabLabel* tabLabel = new Ui::TabLabel("fan", labelString);
+            Ui::TabLabel* tabLabel = new Ui::TabLabel("fan" + QString::fromStdString(darkTheme ? "_dark" : ""), labelString);
 
             int tabIndex = this->tabBar()->count() - 1;
 

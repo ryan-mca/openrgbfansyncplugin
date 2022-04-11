@@ -32,20 +32,32 @@ public:
     QVector<double> qv_y;
 
     ///
-    /// \brief setXAxisRange changes the X axis min/max range
-    /// \param min
-    /// \param max
-    /// \param offset value to add to the max axis range for visibility
+    /// \brief setXAxisMinRange changes the X axis min range
+    /// \param value
+    /// \param margin value to add to the axis range for visibility
     ///
-    void setXAxisRange(int min, int max, int maxMargin);
+    void setXAxisMinRange(int value, int margin = 0);
 
     ///
-    /// \brief setYAxisRange changes the Y axis min/max range
-    /// \param min
-    /// \param max
-    /// \param offset value to add to the max axis range for visibility
+    /// \brief setXAxisMaxRange changes the X axis max range
+    /// \param value
+    /// \param margin value to add to the axis range for visibility
     ///
-    void setYAxisRange(int min, int max, int maxMargin);
+    void setXAxisMaxRange(int value, int margin = 0);
+
+    ///
+    /// \brief setYAxisMinRange changes the Y axis min range
+    /// \param value
+    /// \param margin value to add to the axis range for visibility
+    ///
+    void setYAxisMinRange(int value, int margin = 0);
+
+    ///
+    /// \brief setYAxisMaxRange changes the Y axis max range
+    /// \param value
+    /// \param margin value to add to the axis range for visibility
+    ///
+    void setYAxisMaxRange(int value, int margin = 0);
 
     ///
     /// \brief setXAxisLabel changes the X Axis Label
@@ -64,6 +76,12 @@ public:
     ///
     void updateData();
 
+    ///
+    /// \brief getGraphData
+    /// \return the graph point container
+    ///
+    QSharedPointer<QCPGraphDataContainer> getGraphData();
+
 private slots:
     void clickedGraph(QMouseEvent *event);
     void rePlot();
@@ -78,14 +96,9 @@ private slots:
     void getPointIndices();
     bool checkForNearbyPoints(QMouseEvent *event);
     void dragPoint(int index_x, int index_y, QMouseEvent *event);
-    void drawFillerLines();
     void drawPointHoveredText(QMouseEvent *event);
 
 private:
-    QVector<double> leftLineX;
-    QVector<double> leftLineY;
-    QVector<double> rightLineX;
-    QVector<double> rightLineY;
     QCPItemText *coordText;
     int x_lower = 0;
     int x_upper = 100;

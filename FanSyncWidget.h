@@ -13,7 +13,7 @@ class FanSyncWidget : public QTabWidget
 {
     Q_OBJECT
 public:
-    FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent = nullptr);
+    FanSyncWidget(HardwareMonitor *hardwareMonitor, bool darkTheme, QWidget *parent = nullptr);
 
 private:
     QList<std::string> hiddenControls;

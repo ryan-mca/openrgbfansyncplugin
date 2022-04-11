@@ -20,22 +20,41 @@ public:
     FanSyncPage(std::string controlIdentifier, HardwareMonitor *hardwareMonitor, QWidget *parent = nullptr);
 
 private:
+    const std::string variableNames[26] = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
+
     std::string controlIdentifier;
     HardwareMonitor *hardwareMonitor;
+
+
     QComboBox *sensorDropdown;
-    QPlainTextEdit *measureFunctionText;
+    QPlainTextEdit *measureFunctionTextEdit;
     QLabel *selectedSensorValueLabel;
     QLabel *measureFunctionResultLabel;
     QLineEdit *minValueText;
     QLineEdit *maxValueText;
+    QLabel *currentFanSpeed;
 
-    QButtonGroup *fanPresetButtonGroup;
+    FanCurvePlotWidget *fanCurveWidget;
+
+    std::unique_ptr<exprtk::expression<float>> measureFunctionExpression;
+    std::unique_ptr<exprtk::symbol_table<float>> measureFunctionExpressionSymbolTable;
+
+    void extractSensorString(QString str, QStringList &result);
 
 public slots:
     ///
     /// \brief updateControl applies the measure curve to the control associated
     ///
     void updateControl();
+
+private slots:
+    ///
+    /// \brief measureFunctionTextUpdated called when the measure function text is updated
+    /// this handles creating the exprtk expression and replacing the sensor ids with single letter variables
+    ///
+    void measureFunctionTextUpdated();
+
+    void setFanPreset(QAbstractButton *button);
 
 };
 

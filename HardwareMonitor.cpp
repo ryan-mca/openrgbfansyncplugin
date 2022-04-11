@@ -18,7 +18,8 @@ HardwareMonitor::HardwareMonitor()
             }
             else
             {
-                sensorList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<0>(hardwareSensor);
+                sensorList[std::get<2>(hardwareSensor)] = HardwareName + " - " + std::get<1>(hardwareSensor) + " - " + std::get<0>(hardwareSensor);
+                sensorListHierarchy[HardwareName][std::get<1>(hardwareSensor)][std::get<0>(hardwareSensor)] = std::get<2>(hardwareSensor);
             }
         }
     }
@@ -28,6 +29,11 @@ void HardwareMonitor::updateSensors()
 {
     for(auto& sensor : sensorValue)
     {
+        if (!sensorList.count(sensor.first) && !controlHardwareList.count(sensor.first))
+        {
+            continue;
+        }
+
         sensor.second = LHWM::GetSensorValue(sensor.first);
     }
 

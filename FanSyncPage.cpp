@@ -12,7 +12,7 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
 
     // first instruction lines
     QLabel *instructions = new QLabel("Add a measurement from the dropdown below then format the measurement function as required.\n"
-                                      "Most Mathmatical expressions are supported, example: \"({{cputemp}} + {{gputemp}}) / 2\".\n"
+                                      "Most Mathmatical expressions are supported, example: \"[/cpu/temp/0] + [/gpu/temp/0]) / 2\".\n"
                                       "See: http://www.partow.net/programming/exprtk/ for more info.");
     QFont instructionsFont( "Arial", 6);
     instructions->setFont(instructionsFont);
@@ -22,48 +22,76 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     QHBoxLayout *hardwareDropdownLayout = new QHBoxLayout();
 
     sensorDropdown = new QComboBox();
+    sensorDropdown->addItem("Select Sensor");
+    sensorDropdown->setItemData(0, false, Qt::UserRole -1);
 
-    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->sensorList)
+//    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->sensorList)
+//    {
+//        sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
+//        QString sensorIdentifierQstring = QString::fromStdString(sensorIdentifier);
+//        QString sensorNameQstring = QString::fromStdString(sensorName);
+//        sensorDropdown->addItem(sensorNameQstring, sensorIdentifierQstring);
+//    }
+
+    for (const auto& [hardwareName, type] : hardwareMonitor->sensorListHierarchy)
     {
-        QString sensorIdentifierQstring = QString::fromStdString(sensorIdentifier);
-        QString sensorNameQstring = QString::fromStdString(sensorName);
-        sensorDropdown->addItem(sensorNameQstring, sensorIdentifierQstring);
+        sensorDropdown->addItem(QString::fromStdString(hardwareName));
+        sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
+        for (const auto& [typeName, sensor] : type)
+        {
+            sensorDropdown->addItem(" " + QString::fromStdString(typeName));
+            sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
+            for (const auto& [sensorName, sensorIdentifier] : sensor)
+            {
+                sensorDropdown->addItem("    " + QString::fromStdString(sensorName), QString::fromStdString(sensorIdentifier));
+            }
+        }
     }
+
 
     hardwareDropdownLayout->addWidget(sensorDropdown, 3);
 
-    selectedSensorValueLabel = new QLabel("()");
+    selectedSensorValueLabel = new QLabel("");
     hardwareDropdownLayout->addWidget(selectedSensorValueLabel);
+
+    // sensor dropdoown change action
+    QObject::connect(sensorDropdown,  QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
+        if (!sensorDropdown->currentData().toBool())
+        {
+            return;
+        }
+        std::string sString = sensorDropdown->currentData().toString().toStdString();
+        hardwareMonitor->sensorValue[sString] = hardwareMonitor->sensorValue[sString];
+//        hardwareMonitor->updateSensors();
+
+//        selectedSensorValueLabel->setText("(" + QString::number(hardwareMonitor->sensorValue[sString]) + ")");
+    });
 
     QPushButton *addSensorButton = new QPushButton("Add");
     hardwareDropdownLayout->addWidget(addSensorButton, 1);
-
-//    QLabel *instructionsToolTipLabel = new QLabel("i");
-//    instructionsToolTipLabel->setToolTip("Add a measurement from the dropdown on the left then format the measurement function as required.\n"
-//                                         "Most Mathmatical expressions are supported, example: \"({{cputemp}} + {{gputemp}}) / 2\".\n"
-//                                         "See: http://www.partow.net/programming/exprtk/ for more info.");
-//    hardwareDropdownLayout->addWidget(instructionsToolTipLabel);
 
     mainLayout->addLayout(hardwareDropdownLayout);
 
 
     // measure function textbox
-    measureFunctionText = new QPlainTextEdit();
-    mainLayout->addWidget(measureFunctionText, 2);
+    measureFunctionTextEdit = new QPlainTextEdit();
+    QObject::connect(measureFunctionTextEdit, &QPlainTextEdit::textChanged, this, &FanSyncPage::measureFunctionTextUpdated);
+
+    mainLayout->addWidget(measureFunctionTextEdit, 2);
 
     // add sensor button action
-    QObject::connect(addSensorButton, &QPushButton::clicked, addSensorButton, [this]() {
-        if (sensorDropdown->currentIndex() == -1)
+    QObject::connect(addSensorButton, &QPushButton::clicked, this, [this]() {
+        if (!sensorDropdown->currentData().toBool())
         {
             return;
         }
-        measureFunctionText->appendPlainText("{{" + sensorDropdown->currentData().toString() + "}}");
+        measureFunctionTextEdit->insertPlainText("[" + sensorDropdown->currentData().toString() + "]");
     });
 
     // set min max
     QHBoxLayout *minMaxLayout = new QHBoxLayout();
 
-    measureFunctionResultLabel = new QLabel("Current Value: 0");
+    measureFunctionResultLabel = new QLabel("Result: nan | Normalized Result: nan");
     minMaxLayout->addWidget(measureFunctionResultLabel);
 
     minMaxLayout->addStretch();
@@ -89,18 +117,18 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     mainLayout->addLayout(minMaxLayout);
 
     // Fan Curve
-    FanCurvePlotWidget *fanCurveWidget = new FanCurvePlotWidget();
+    fanCurveWidget = new FanCurvePlotWidget();
     mainLayout->addWidget(fanCurveWidget, 4);
 
     // Fan Presets
     QHBoxLayout *fanPresetLayout = new QHBoxLayout();
 
-    fanPresetButtonGroup = new QButtonGroup();
+    QButtonGroup *fanPresetButtonGroup = new QButtonGroup();
 
     QRadioButton* customPresetButton = new QRadioButton("Custom");
-    QRadioButton* silentPresetButton = new QRadioButton("Silent");
-    QRadioButton* normalPresetButton = new QRadioButton("Normal");
-    QRadioButton* performancePresetButton = new QRadioButton("Performance");
+    QRadioButton* silentPresetButton = new QRadioButton("Quiet");
+    QRadioButton* normalPresetButton = new QRadioButton("Balanced");
+    QRadioButton* performancePresetButton = new QRadioButton("Cool");
 
     fanPresetButtonGroup->addButton(customPresetButton, 1);
     fanPresetButtonGroup->addButton(silentPresetButton, 2);
@@ -108,6 +136,12 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     fanPresetButtonGroup->addButton(performancePresetButton, 4);
 
     customPresetButton->setChecked(true);
+
+    QObject::connect(fanPresetButtonGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, &FanSyncPage::setFanPreset);
+
+    currentFanSpeed = new QLabel("Fan Speed: " + QString::number(hardwareMonitor->sensorValue[controlIdentifier]) + "%");
+    fanPresetLayout->addWidget(currentFanSpeed);
+    fanPresetLayout->addStretch();
 
     QLabel *fanPresetLabel = new QLabel("Preset: ");
     fanPresetLayout->addWidget(fanPresetLabel);
@@ -130,36 +164,203 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     actionButtonsLayout->addWidget(saveButton);
 
     mainLayout->addLayout(actionButtonsLayout);
+}
 
-    connect(saveButton, &QPushButton::released, this, &FanSyncPage::updateControl);
+void FanSyncPage::setFanPreset(QAbstractButton *button)
+{
+    fanCurveWidget->qv_x.clear();
+    fanCurveWidget->qv_y.clear();
 
+    if (button->text() == "Quiet")
+    {
+        fanCurveWidget->qv_x.append(0);
+        fanCurveWidget->qv_y.append(0);
+
+        fanCurveWidget->qv_x.append(20);
+        fanCurveWidget->qv_y.append(0);
+
+        fanCurveWidget->qv_x.append(60);
+        fanCurveWidget->qv_y.append(60);
+
+        fanCurveWidget->qv_x.append(100);
+        fanCurveWidget->qv_y.append(60);
+    }
+    else if (button->text() == "Balanced")
+    {
+        fanCurveWidget->qv_x.append(0);
+        fanCurveWidget->qv_y.append(0);
+
+        fanCurveWidget->qv_x.append(100);
+        fanCurveWidget->qv_y.append(100);
+    }
+    else if (button->text() == "Cool")
+    {
+        fanCurveWidget->qv_x.append(0);
+        fanCurveWidget->qv_y.append(0);
+
+        fanCurveWidget->qv_x.append(100);
+        fanCurveWidget->qv_y.append(100);
+    }
+    else
+    {
+        fanCurveWidget->qv_x.append(0);
+        fanCurveWidget->qv_y.append(0);
+
+        fanCurveWidget->qv_x.append(100);
+        fanCurveWidget->qv_y.append(100);
+    }
+
+    fanCurveWidget->updateData();
+}
+
+void FanSyncPage::measureFunctionTextUpdated()
+{
+    QString measureFunctionText = measureFunctionTextEdit->toPlainText();
+
+    QStringList sensorStrings;
+    extractSensorString(measureFunctionText, sensorStrings);
+    sensorStrings.removeDuplicates();
+
+    if (sensorStrings.count() > 26)
+    {
+        QMessageBox Msgbox;
+        Msgbox.setText("Too Many Sensors Used. Max is 26");
+        Msgbox.exec();
+        return;
+    }
+
+    measureFunctionExpressionSymbolTable = std::make_unique<exprtk::symbol_table<float>>();
+
+    for (int i = 0; i < sensorStrings.count(); i++)
+    {
+        QString s = sensorStrings[i];
+
+        std::string sString = s.toStdString();
+        hardwareMonitor->sensorValue[sString] = hardwareMonitor->sensorValue[sString];
+
+        measureFunctionText.replace(s, QString::fromStdString(variableNames[i]));
+
+        measureFunctionExpressionSymbolTable->add_variable(variableNames[i], hardwareMonitor->sensorValue[sString]);
+    }
+    measureFunctionExpressionSymbolTable->add_constants();
+
+    std::string measureFunctionTextString = measureFunctionText.toStdString();
+
+    measureFunctionExpression = std::make_unique<exprtk::expression<float>>();
+    measureFunctionExpression->register_symbol_table(*measureFunctionExpressionSymbolTable);
+
+    exprtk::parser<float> parser;
+    parser.compile(measureFunctionTextString, *measureFunctionExpression);
+}
+
+// adapted from https://www.geeksforgeeks.org/extract-substrings-between-any-pair-of-delimiters/
+void FanSyncPage::extractSensorString(QString str, QStringList &result)
+{
+    // Stores the indices of
+    std::stack<int> dels;
+    for (int i = 0; i < str.size(); i++) {
+        // If opening delimiter
+        // is encountered
+        if (str[i] == '[') {
+            dels.push(i);
+        }
+
+        // If closing delimiter
+        // is encountered
+        else if (str[i] == ']' && !dels.empty()) {
+
+            // Extract the position
+            // of opening delimiter
+            int pos = dels.top();
+
+            dels.pop();
+
+            // Length of substring
+            int len = i - 1 - pos;
+
+            // Extract the substring
+            QString ans = str.mid(pos + 1, len);
+
+            result.push_back(ans);
+        }
+    }
 }
 
 void FanSyncPage::updateControl()
 {
-    typedef exprtk::symbol_table<float> symbol_table_t;
-    typedef exprtk::expression<float>   expression_t;
-    typedef exprtk::parser<float>       parser_t;
-
-    std::string expression_string = measureFunctionText->toPlainText().toStdString();
-
-    float x;
-
-    symbol_table_t symbol_table;
-    symbol_table.add_variable("{{xe}}",x);
-    symbol_table.add_constants();
-
-    expression_t expression;
-    expression.register_symbol_table(symbol_table);
-
-    parser_t parser;
-    parser.compile(expression_string,expression);
-
-    for (x = float(-5); x <= float(+5); x += float(1))
+    float currentFanControlSpeed = hardwareMonitor->sensorValue[controlIdentifier];
+    if (this->isVisible())
     {
-       float y = expression.value();
-       printf("%19.15f\t%19.15f\n",x,y);
+        if (sensorDropdown->currentData().toBool())
+        {
+            selectedSensorValueLabel->setText("(" + QString::number(hardwareMonitor->sensorValue[sensorDropdown->currentData().toString().toStdString()]) + ")");
+        }
+        currentFanSpeed->setText("Fan Speed: " + QString::number(currentFanControlSpeed) + "%");
+    }
+
+    if (!measureFunctionExpression)
+    {
+        return;
+    }
+
+    float expressionResult = measureFunctionExpression->value();
+    int minValue = minValueText->text().toInt();
+    int maxValue = maxValueText->text().toInt();
+
+    int normalizedResult = fmax(0, fmin(100, ceil((expressionResult - minValue) / (maxValue - minValue) * 100)));
+
+    if(this->isVisible())
+    {
+        measureFunctionResultLabel->setText("Result: " + QString::number(expressionResult) + " | Normalized Result: " + QString::number(normalizedResult));
+    }
+
+    int fanSpeed = 100;
+
+    int graphDataPointsCount = fanCurveWidget->getGraphData()->size();
+
+    if (graphDataPointsCount > 1)
+    {
+        int x1Index = 0;
+        int x2Index = 1;
+
+        if (normalizedResult < fanCurveWidget->getGraphData()->at(0)->key) // point is below the first point
+        {
+            fanSpeed = fanCurveWidget->getGraphData()->at(0)->value;
+        }
+        else if (normalizedResult > fanCurveWidget->getGraphData()->at(graphDataPointsCount - 1)->key) // point is higher than the last point
+        {
+            fanSpeed = fanCurveWidget->getGraphData()->at(graphDataPointsCount - 1)->value;
+        }
+        else // check if we can place the point in between 2 points on the graph
+        {
+            for (int i = 1; i < graphDataPointsCount; i++)
+            {
+                if (normalizedResult >= fanCurveWidget->getGraphData()->at(i-1)->key && normalizedResult <= fanCurveWidget->getGraphData()->at(i)->key)
+                {
+                    x1Index = i - 1;
+                    x2Index = i;
+                    break;
+                }
+            }
+
+            if (x1Index == -1 || x2Index == -1) // cant find anything give up and set fans to 100%
+            {
+                fanSpeed = 100;
+            }
+            else  // interpolate the fan speed based on the curve
+            {
+                double x1 = fanCurveWidget->getGraphData()->at(x1Index)->key;
+                double y1 = fanCurveWidget->getGraphData()->at(x1Index)->value;
+                double x2 = fanCurveWidget->getGraphData()->at(x2Index)->key;
+                double y2 = fanCurveWidget->getGraphData()->at(x2Index)->value;
+
+                fanSpeed = fmax(0, fmin(100, ceil((((y2 - y1) / (x2 - x1)) * (normalizedResult - x1)) + y1)));
+            }
+        }
+
+        if (fanSpeed > currentFanControlSpeed + 2 || fanSpeed < currentFanControlSpeed - 2)
+        {
+            hardwareMonitor->setControlValue(controlIdentifier, fanSpeed);
+        }
     }
 }
-
-

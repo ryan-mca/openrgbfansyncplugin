@@ -32,20 +32,6 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     tickPen.setWidthF(0.5);
     tickPen.setColor(textColor);
 
-    // Define the filler line vectors and graphs so they don't need to be recreated every update
-    leftLineX.append(x_lower);
-    leftLineX.append(0);
-    leftLineY.append(0);
-    leftLineY.append(0);
-
-    rightLineX.append(0);
-    rightLineX.append(x_upper);
-    rightLineY.append(0);
-    rightLineY.append(0);
-
-    fanCurve->addGraph();
-    fanCurve->addGraph();
-
     fanCurve->addGraph();
     fanCurve->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
     fanCurve->graph(0)->setLineStyle(QCPGraph::lsLine);
@@ -56,8 +42,6 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     fanCurve->xAxis->setTickLabelColor(textColor);
     fanCurve->yAxis->setTickLabelColor(textColor);
     fanCurve->graph(0)->setPen(graphPen);
-    fanCurve->graph(1)->setPen(graphPen);
-    fanCurve->graph(2)->setPen(graphPen);
     fanCurve->xAxis->setTickPen(tickPen);
     fanCurve->yAxis->setTickPen(tickPen);
     fanCurve->xAxis->setSubTickPen(tickPen);
@@ -88,7 +72,7 @@ FanCurvePlotWidget::FanCurvePlotWidget(QWidget *parent)
     fanCurve->yAxis->setLabel("Fan speed (%)");
 
     fanCurve->graph(0)->setData(qv_x, qv_y);
-    drawFillerLines();
+    rePlot();
 
     QCPItemText *text = new QCPItemText(fanCurve);
     coordText = text;
@@ -126,7 +110,7 @@ void FanCurvePlotWidget::clickedGraph(QMouseEvent *event)
         }
     }
     fanCurve->graph(0)->setData(qv_x, qv_y);
-    drawFillerLines();
+    rePlot();
 }
 
 void FanCurvePlotWidget::clickedPoint(QCPAbstractPlottable*, int, QMouseEvent *event)
@@ -146,7 +130,6 @@ void FanCurvePlotWidget::clickedPoint(QCPAbstractPlottable*, int, QMouseEvent *e
             }
       fanCurve->graph(0)->setData(qv_x, qv_y);
       rePlot();
-      drawFillerLines();
     }
 }
 
@@ -208,7 +191,12 @@ bool FanCurvePlotWidget::checkForDuplicatePoint(int x, int y)
 bool FanCurvePlotWidget::removePoint(int x, int y)
 // Return true if there is a duplicate point
 {
-    for (int i=0; i<qv_x.length(); i++) {
+    if (qv_x.length() >= 2)
+    {
+        return false;
+    }
+
+    for (int i=0; i < qv_x.length(); i++) {
         qv_x[i] = round(qv_x[i]);
         qv_y[i] = round(qv_y[i]);
         if ((x == qv_x[i]) && (y == qv_y[i])) {
@@ -319,26 +307,6 @@ void FanCurvePlotWidget::dragPoint(int index_x, int index_y, QMouseEvent* event)
     coordText->setText(xString + ", " + yString);
 
     fanCurve->graph(0)->setData(qv_x, qv_y);
-    drawFillerLines();
-}
-
-void FanCurvePlotWidget::drawFillerLines()
-{
-    // Draw the filler lines separately so they don't interfere with the main data. graph(1) = leftward line, graph(2) = rightward line
-
-    leftLineX[1] = fanCurve->graph(0)->dataSortKey(0);
-
-    leftLineY[0] = fanCurve->graph(0)->dataMainValue(0);
-    leftLineY[1] = fanCurve->graph(0)->dataMainValue(0);
-
-    fanCurve->graph(1)->setData(leftLineX, leftLineY);
-
-    rightLineX[0] = fanCurve->graph(0)->dataSortKey(qv_x.length() -1);
-
-    rightLineY[0] = fanCurve->graph(0)->dataMainValue(qv_x.length() -1);
-    rightLineY[1] = fanCurve->graph(0)->dataMainValue(qv_x.length() -1);
-
-    fanCurve->graph(2)->setData(rightLineX, rightLineY);
     rePlot();
 }
 
@@ -352,18 +320,28 @@ void FanCurvePlotWidget::detectRelease(QMouseEvent*)
     rePlot();
 }
 
-void FanCurvePlotWidget::setXAxisRange(int min, int max, int maxMargin)
+void FanCurvePlotWidget::setXAxisMinRange(int value, int margin)
 {
-    fanCurve->xAxis->setRange(min, max + maxMargin);
-    x_lower = min;
-    x_upper = max;
+    fanCurve->xAxis->setRangeLower(value + margin);
+    x_lower = value;
 }
 
-void FanCurvePlotWidget::setYAxisRange(int min, int max, int maxMargin)
+void FanCurvePlotWidget::setXAxisMaxRange(int value, int margin)
 {
-    fanCurve->yAxis->setRange(min, max + maxMargin);
-    y_lower = min;
-    y_upper = max;
+    fanCurve->xAxis->setRangeUpper(value + margin);
+    x_upper = value;
+}
+
+void FanCurvePlotWidget::setYAxisMinRange(int value, int margin)
+{
+    fanCurve->yAxis->setRangeLower(value + margin);
+    y_lower = value;
+}
+
+void FanCurvePlotWidget::setYAxisMaxRange(int value, int margin)
+{
+    fanCurve->yAxis->setRangeUpper(value + margin);
+    y_upper = value;
 }
 
 void FanCurvePlotWidget::setXAxisLabel(QString& text)
@@ -380,5 +358,9 @@ void FanCurvePlotWidget::updateData()
 {
     fanCurve->graph(0)->setData(qv_x, qv_y);
     rePlot();
-    drawFillerLines();
+}
+
+QSharedPointer<QCPGraphDataContainer> FanCurvePlotWidget::getGraphData()
+{
+    return fanCurve->graph(0)->data();
 }

@@ -48,7 +48,7 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
     if (can_load)
     {
         hardwareMonitor = new HardwareMonitor();
-        mainWidget = new FanSyncWidget(hardwareMonitor);
+        mainWidget = new FanSyncWidget(hardwareMonitor, DarkTheme);
 
         hardwareMonitor->moveToThread(&workerThread);
         mainWidget->moveToThread(&workerThread);
