@@ -129,11 +129,13 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     QRadioButton* silentPresetButton = new QRadioButton("Quiet");
     QRadioButton* normalPresetButton = new QRadioButton("Balanced");
     QRadioButton* performancePresetButton = new QRadioButton("Cool");
+    QRadioButton* fullSpeedPresetButton = new QRadioButton("Full Speed");
 
     fanPresetButtonGroup->addButton(customPresetButton, 1);
     fanPresetButtonGroup->addButton(silentPresetButton, 2);
     fanPresetButtonGroup->addButton(normalPresetButton, 3);
     fanPresetButtonGroup->addButton(performancePresetButton, 4);
+    fanPresetButtonGroup->addButton(fullSpeedPresetButton, 5);
 
     customPresetButton->setChecked(true);
 
@@ -143,13 +145,14 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     fanPresetLayout->addWidget(currentFanSpeed);
     fanPresetLayout->addStretch();
 
-    QLabel *fanPresetLabel = new QLabel("Preset: ");
+    QLabel *fanPresetLabel = new QLabel("Presets: ");
     fanPresetLayout->addWidget(fanPresetLabel);
 
     fanPresetLayout->addWidget(customPresetButton);
     fanPresetLayout->addWidget(silentPresetButton);
     fanPresetLayout->addWidget(normalPresetButton);
     fanPresetLayout->addWidget(performancePresetButton);
+    fanPresetLayout->addWidget(fullSpeedPresetButton);
 
     mainLayout->addLayout(fanPresetLayout);
 
@@ -174,21 +177,33 @@ void FanSyncPage::setFanPreset(QAbstractButton *button)
     if (button->text() == "Quiet")
     {
         fanCurveWidget->qv_x.append(0);
-        fanCurveWidget->qv_y.append(0);
+        fanCurveWidget->qv_y.append(20);
 
         fanCurveWidget->qv_x.append(20);
-        fanCurveWidget->qv_y.append(0);
+        fanCurveWidget->qv_y.append(20);
 
-        fanCurveWidget->qv_x.append(60);
-        fanCurveWidget->qv_y.append(60);
+        fanCurveWidget->qv_x.append(70);
+        fanCurveWidget->qv_y.append(70);
+
+        fanCurveWidget->qv_x.append(75);
+        fanCurveWidget->qv_y.append(100);
 
         fanCurveWidget->qv_x.append(100);
-        fanCurveWidget->qv_y.append(60);
+        fanCurveWidget->qv_y.append(100);
     }
     else if (button->text() == "Balanced")
     {
         fanCurveWidget->qv_x.append(0);
-        fanCurveWidget->qv_y.append(0);
+        fanCurveWidget->qv_y.append(20);
+
+        fanCurveWidget->qv_x.append(20);
+        fanCurveWidget->qv_y.append(20);
+
+        fanCurveWidget->qv_x.append(65);
+        fanCurveWidget->qv_y.append(70);
+
+        fanCurveWidget->qv_x.append(70);
+        fanCurveWidget->qv_y.append(100);
 
         fanCurveWidget->qv_x.append(100);
         fanCurveWidget->qv_y.append(100);
@@ -196,7 +211,24 @@ void FanSyncPage::setFanPreset(QAbstractButton *button)
     else if (button->text() == "Cool")
     {
         fanCurveWidget->qv_x.append(0);
-        fanCurveWidget->qv_y.append(0);
+        fanCurveWidget->qv_y.append(20);
+
+        fanCurveWidget->qv_x.append(20);
+        fanCurveWidget->qv_y.append(20);
+
+        fanCurveWidget->qv_x.append(55);
+        fanCurveWidget->qv_y.append(70);
+
+        fanCurveWidget->qv_x.append(60);
+        fanCurveWidget->qv_y.append(100);
+
+        fanCurveWidget->qv_x.append(100);
+        fanCurveWidget->qv_y.append(100);
+    }
+    else if (button->text() == "Full Speed")
+    {
+        fanCurveWidget->qv_x.append(0);
+        fanCurveWidget->qv_y.append(100);
 
         fanCurveWidget->qv_x.append(100);
         fanCurveWidget->qv_y.append(100);
