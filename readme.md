@@ -31,4 +31,4 @@ This version of the of the lhwm-wrapper is compatible with [OpenRGBHardwareSyncP
 * Reset button restores original default (Does not save automatically)
 
 ## Screenshot
-![Screenshot](https://gitlab.com/ShadyNawara/openrgbfansyncplugin/-/blob/master/Screenshot.png)
+![Screenshot](https://gitlab.com/ShadyNawara/openrgbfansyncplugin/-/raw/master/Screenshot.png)
