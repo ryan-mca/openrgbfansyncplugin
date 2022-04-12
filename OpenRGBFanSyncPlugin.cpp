@@ -96,14 +96,14 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
     }
 }
 
-// QMenu* OpenRGBFanSyncPlugin::GetTrayMenu()
-// {
-//     printf("[OpenRGBFanSyncPlugin] Creating tray menu.\n");
+ QMenu* OpenRGBFanSyncPlugin::GetTrayMenu()
+ {
+    // printf("[OpenRGBFanSyncPlugin] Creating tray menu.\n");
 
-//     QMenu* menu = new QMenu("Hardware Fan Sync");
+    // QMenu* menu = new QMenu("Hardware Fan Sync");
 
-//     return menu;
-// }
+     return nullptr;
+ }
 
 void OpenRGBFanSyncPlugin::Unload()
 {
