@@ -1,9 +1,12 @@
 #include "FanSyncWidget.h"
+#include "OpenRGBFanSyncPlugin.h"
 
-FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, bool darkTheme, QWidget *parent)
+FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent)
     : QTabWidget{parent}
 {
     this->setTabPosition(QTabWidget::West);
+
+    loadSettings();
 
     for (const auto& [controlIdentifier, controlName] : hardwareMonitor->controlHardwareList)
     {
@@ -14,14 +17,14 @@ FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, bool darkTheme, Q
             this->addTab(page, "");
 
             QString labelString = QString::fromStdString(controlName);
-            Ui::TabLabel* tabLabel = new Ui::TabLabel("fan" + QString::fromStdString(darkTheme ? "_dark" : ""), labelString);
+            Ui::TabLabel* tabLabel = new Ui::TabLabel("fan" + QString::fromStdString(OpenRGBFanSyncPlugin::DarkTheme ? "_dark" : ""), labelString);
 
             int tabIndex = this->tabBar()->count() - 1;
 
             this->tabBar()->setTabButton(tabIndex, QTabBar::LeftSide, tabLabel);
             this->tabBar()->setTabData(tabIndex, QString::fromStdString(controlIdentifier));
 
-            if (hiddenControls.contains(controlIdentifier))
+            if (std::find(hiddenControls.begin(), hiddenControls.end(), controlIdentifier) != hiddenControls.end())
             {
                 this->tabBar()->setTabVisible(tabIndex, false);
             }
@@ -39,12 +42,12 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
 
     QMenu tabMenu;
 
-    if (hiddenControls.count() < this->tabBar()->count() - 1)
+    if (hiddenControls.size() < this->tabBar()->count() - 1)
     {
         tabMenu.addAction("Hide");
     }
 
-    if (hiddenControls.count())
+    if (hiddenControls.size())
     {
         tabMenu.addAction("Show All");
     }
@@ -56,6 +59,8 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
         hiddenControls.push_back(this->tabBar()->tabData(tabIndex).toString().toStdString());
 
         QWidget::repaint();
+
+        saveSettings();
     }
     else if (selectedItem && selectedItem->text() == "Show All")
     {
@@ -66,5 +71,22 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
         hiddenControls.clear();
 
         QWidget::repaint();
+
+        saveSettings();
+    }
+}
+
+void FanSyncWidget::saveSettings()
+{
+    json value(hiddenControls);
+    Settings::Save("hiddenControls", value);
+}
+
+void FanSyncWidget::loadSettings()
+{
+    json hiddenControlsJson = Settings::Load("hiddenControls");
+    if (hiddenControlsJson.is_array())
+    {
+        hiddenControls = hiddenControlsJson.get<std::vector<std::string>>();
     }
 }

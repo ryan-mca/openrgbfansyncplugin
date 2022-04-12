@@ -123,7 +123,7 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     // Fan Presets
     QHBoxLayout *fanPresetLayout = new QHBoxLayout();
 
-    QButtonGroup *fanPresetButtonGroup = new QButtonGroup();
+    fanPresetButtonGroup = new QButtonGroup();
 
     QRadioButton* customPresetButton = new QRadioButton("Custom");
     QRadioButton* silentPresetButton = new QRadioButton("Quiet");
@@ -163,10 +163,18 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     QPushButton *resetButton = new QPushButton("Reset");
     actionButtonsLayout->addWidget(resetButton);
 
+    QObject::connect(resetButton, &QPushButton::clicked, this, &FanSyncPage::resetPage);
+
+
     QPushButton *saveButton = new QPushButton("Save");
     actionButtonsLayout->addWidget(saveButton);
 
+    QObject::connect(saveButton, &QPushButton::clicked, this, &FanSyncPage::saveSettings);
+
+
     mainLayout->addLayout(actionButtonsLayout);
+
+    loadSettings();
 }
 
 void FanSyncPage::setFanPreset(QAbstractButton *button)
@@ -250,7 +258,7 @@ void FanSyncPage::measureFunctionTextUpdated()
     QString measureFunctionText = measureFunctionTextEdit->toPlainText();
 
     QStringList sensorStrings;
-    extractSensorString(measureFunctionText, sensorStrings);
+    extractSensorsFromString(measureFunctionText, sensorStrings);
     sensorStrings.removeDuplicates();
 
     if (sensorStrings.count() > 26)
@@ -286,7 +294,7 @@ void FanSyncPage::measureFunctionTextUpdated()
 }
 
 // adapted from https://www.geeksforgeeks.org/extract-substrings-between-any-pair-of-delimiters/
-void FanSyncPage::extractSensorString(QString str, QStringList &result)
+void FanSyncPage::extractSensorsFromString(QString str, QStringList &result)
 {
     // Stores the indices of
     std::stack<int> dels;
@@ -394,5 +402,66 @@ void FanSyncPage::updateControl()
         {
             hardwareMonitor->setControlValue(controlIdentifier, fanSpeed);
         }
+    }
+}
+
+void FanSyncPage::resetPage()
+{
+    sensorDropdown->setCurrentIndex(0);
+    minValueText->setText("0");
+    maxValueText->setText("100");
+    measureFunctionTextEdit->setPlainText("");
+    fanPresetButtonGroup->button(1)->click();
+    measureFunctionExpression.reset();
+    measureFunctionExpressionSymbolTable.reset();
+
+    measureFunctionResultLabel->setText("Result: nan | Normalized Result: nan");
+    selectedSensorValueLabel->setText("");
+}
+
+void FanSyncPage::saveSettings()
+{
+    json setting;
+    setting["measureFunctionText"] = measureFunctionTextEdit->toPlainText().toStdString();
+    setting["minValue"] = minValueText->text().toStdString();
+    setting["maxValue"] = maxValueText->text().toStdString();
+    setting["fanPreset"] = fanPresetButtonGroup->checkedId();
+    setting["graphPointsX"] = json(fanCurveWidget->qv_x);
+    setting["graphPointsY"] = json(fanCurveWidget->qv_y);
+    Settings::Save(controlIdentifier, setting);
+}
+
+void FanSyncPage::loadSettings()
+{
+    json controlSettingJson = Settings::Load(controlIdentifier);
+
+    if (controlSettingJson["minValue"].is_string())
+    {
+        minValueText->setText(QString::fromStdString(controlSettingJson["minValue"].get<std::string>()));
+    }
+
+    if (controlSettingJson["maxValue"].is_string())
+    {
+        maxValueText->setText(QString::fromStdString(controlSettingJson["maxValue"].get<std::string>()));
+    }
+
+    if (controlSettingJson["fanPreset"].is_number_integer())
+    {
+        fanPresetButtonGroup->button(controlSettingJson["fanPreset"].get<int>())->setChecked(true);
+    }
+
+    if (controlSettingJson["graphPointsX"].is_array() && controlSettingJson["graphPointsY"].is_array())
+    {
+        std::vector<double> graphX = controlSettingJson["graphPointsX"].get<std::vector<double>>();
+        std::vector<double> graphY = controlSettingJson["graphPointsY"].get<std::vector<double>>();
+
+        fanCurveWidget->qv_x = QVector<double>(graphX.begin(), graphX.end());
+        fanCurveWidget->qv_y = QVector<double>(graphY.begin(), graphY.end());
+        fanCurveWidget->updateData();
+    }
+
+    if (controlSettingJson["measureFunctionText"].is_string())
+    {
+        measureFunctionTextEdit->setPlainText(QString::fromStdString(controlSettingJson["measureFunctionText"].get<std::string>()));
     }
 }

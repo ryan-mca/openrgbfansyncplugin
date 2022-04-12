@@ -49,6 +49,7 @@ INCLUDEPATH +=                                                                  
     OpenRGB/                                                                                    \
     OpenRGB/i2c_smbus                                                                           \
     OpenRGB/RGBController                                                                       \
+    OpenRGB/dependencies/json                                                                   \
     OpenRGB/net_port                                                                            \
     OpenRGB/dependencies/json                                                                   \
     dependencies/exprtk                                                                         \
@@ -60,7 +61,9 @@ HEADERS +=                                                                      
     HardwareMonitor.h \
     OpenRGB/OpenRGBPluginInterface.h                                                            \
     OpenRGB/ResourceManager.h                                                                   \
+    OpenRGB/dependencies/json/json.hpp                                                          \
     OpenRGB/qt/TabLabel.h                                                                       \
+    Settings.h \
     dependencies/exprtk/exprtk.hpp                                                              \
     dependencies/qcustomplot/qcustomplot.h                                                      \
     OpenRGBFanSyncPlugin.h                                                                      \
@@ -73,6 +76,7 @@ SOURCES +=                                                                      
     HardwareMonitor.cpp \
     OpenRGBFanSyncPlugin.cpp                                                                    \
     OpenRGB/qt/TabLabel.cpp                                                                     \
+    Settings.cpp \
     dependencies/qcustomplot/qcustomplot.cpp                                                    \
 
 FORMS +=                                                                                        \

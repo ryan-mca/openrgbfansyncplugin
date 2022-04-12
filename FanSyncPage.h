@@ -7,11 +7,13 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QPlainTextEdit>
+#include <QVector>
 
 #include <exprtk.hpp>
 
 #include "HardwareMonitor.h"
 #include "FanCurvePlotWidget.h"
+#include "Settings.h"
 
 class FanSyncPage : public QWidget
 {
@@ -33,13 +35,18 @@ private:
     QLineEdit *minValueText;
     QLineEdit *maxValueText;
     QLabel *currentFanSpeed;
+    QButtonGroup *fanPresetButtonGroup;
 
     FanCurvePlotWidget *fanCurveWidget;
 
     std::unique_ptr<exprtk::expression<float>> measureFunctionExpression;
     std::unique_ptr<exprtk::symbol_table<float>> measureFunctionExpressionSymbolTable;
 
-    void extractSensorString(QString str, QStringList &result);
+    void extractSensorsFromString(QString str, QStringList &result);
+
+    void resetPage();
+    void saveSettings();
+    void loadSettings();
 
 public slots:
     ///

@@ -8,15 +8,18 @@
 
 #include "HardwareMonitor.h"
 #include "FanSyncPage.h"
+#include "Settings.h"
 
 class FanSyncWidget : public QTabWidget
 {
     Q_OBJECT
 public:
-    FanSyncWidget(HardwareMonitor *hardwareMonitor, bool darkTheme, QWidget *parent = nullptr);
+    FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent = nullptr);
 
 private:
-    QList<std::string> hiddenControls;
+    std::vector<std::string> hiddenControls;
+    void saveSettings();
+    void loadSettings();
 
 private slots:
     void tabBarContextMenuRequested(const QPoint& pos);
