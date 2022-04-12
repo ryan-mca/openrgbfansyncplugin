@@ -1,3 +1,20 @@
+// OpenRGBFanSyncPlugin (https://gitlab.com/ShadyNawara/openrgbfansyncplugin)
+// Copyright (C) 2022 Shady Nawara
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 #include "FanSyncWidget.h"
 #include "OpenRGBFanSyncPlugin.h"
 
@@ -8,6 +25,13 @@ FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent)
 
     loadSettings();
 
+    // hide / show controls context menu
+    this->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(this->tabBar(), &FanSyncWidget::customContextMenuRequested, this, &FanSyncWidget::tabBarContextMenuRequested);
+
+    setUpdatesEnabled(false); // disable repainting till we are done
+
+    bool firstPageSelected = false;
     for (const auto& [controlIdentifier, controlName] : hardwareMonitor->controlHardwareList)
     {
             FanSyncPage *page = new FanSyncPage(controlIdentifier, hardwareMonitor);
@@ -28,11 +52,17 @@ FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent)
             {
                 this->tabBar()->setTabVisible(tabIndex, false);
             }
+            else
+            {
+                if(!firstPageSelected)
+                {
+                    this->tabBar()->setCurrentIndex(tabIndex);
+                    firstPageSelected = true;
+                }
+            }
     }
 
-    // hide / show controls context menu
-    this->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
-    QObject::connect(this->tabBar(), &FanSyncWidget::customContextMenuRequested, this, &FanSyncWidget::tabBarContextMenuRequested);
+    setUpdatesEnabled(true); // reenable painting
 }
 
 void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
@@ -58,19 +88,27 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
         this->tabBar()->setTabVisible(tabIndex, false);
         hiddenControls.push_back(this->tabBar()->tabData(tabIndex).toString().toStdString());
 
-        QWidget::repaint();
+        this->tabBar()->update();
 
         saveSettings();
     }
     else if (selectedItem && selectedItem->text() == "Show All")
     {
+        setUpdatesEnabled(false); // disable repainting till we are done
+
         for(int i = 0; i < this->tabBar()->count(); i++)
         {
-           this->tabBar()->setTabVisible(i, true);
+            if(!this->tabBar()->isTabVisible(i))
+            {
+                this->tabBar()->setTabVisible(i, true);
+            }
         }
-        hiddenControls.clear();
 
-        QWidget::repaint();
+        setUpdatesEnabled(true); // reenable painting
+
+        this->tabBar()->repaint();
+
+        hiddenControls.clear();
 
         saveSettings();
     }
