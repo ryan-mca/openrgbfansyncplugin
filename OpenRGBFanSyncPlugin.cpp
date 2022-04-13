@@ -60,7 +60,11 @@ QWidget* OpenRGBFanSyncPlugin::GetWidget()
 {
     printf("[OpenRGBFanSyncPlugin] Creating widget.\n");
 
-    bool can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
+    bool can_load = true;
+
+#ifdef _WIN32
+    can_load = QFile(QCoreApplication::applicationDirPath()+"\\lhwm-wrapper.dll").exists();
+#endif
 
     if (can_load)
     {

@@ -19,6 +19,7 @@
 
 HardwareMonitor::HardwareMonitor()
 {
+#ifdef _WIN32
     // hardware sensor map from the librehardwaremonitor wrapper
     // [hardware name, [sensor name, sensor type, sensor identifier]]
     std::map<std::string, std::vector<std::tuple<std::string, std::string, std::string>>>
@@ -40,18 +41,61 @@ HardwareMonitor::HardwareMonitor()
             }
         }
     }
+#elif __linux__
+    chips = sensors::get_detected_chips();
+
+    for (int ChipID = 0; ChipID < (int)chips.size(); ChipID++)
+    {
+        std::string HardwareName = chips[ChipID].name();
+
+        sensors::chip_name chip = chips[ChipID];
+        for (int ChipFeatureID = 0; ChipFeatureID < (int)chip.features().size(); ChipFeatureID++)
+        {
+            sensors::feature FTR = chip.features()[ChipFeatureID];
+            std::string BaseFeatureName = (std::string)FTR.name();
+
+            for(int SubFeatureID = 0; SubFeatureID < (int)FTR.subfeatures().size(); SubFeatureID++)
+            {
+                sensors::subfeature SubFTR = FTR.subfeatures()[SubFeatureID];
+                std::string FTRName = (BaseFeatureName + std::string(SubFTR.name()).c_str());
+                std::string Identifier = "/" + std::to_string(ChipID) + "/" + std::to_string(ChipFeatureID) + "/" + std::to_string(SubFeatureID);
+                if(SubFTR.type() == sensors::subfeature_type::input && SubFTR.readable())
+                {
+                    sensorList[Identifier] = HardwareName + " - " + BaseFeatureName + " - " + FTRName;
+                }
+                else if(FTR.type() == sensors::feature_type::fan && SubFTR.writable())
+                {
+                    controlHardwareList[Identifier] = HardwareName + " - " + BaseFeatureName + " - " + FTRName;
+                    sensorValue[Identifier] = 0;
+                }
+            }
+        }
+    }
+
+#endif
 }
 
 void HardwareMonitor::updateSensors()
 {
     for(auto& sensor : sensorValue)
     {
-        if (!sensorList.count(sensor.first) && !controlHardwareList.count(sensor.first))
+        if (sensorList.find(sensor.first) == sensorList.end() && controlHardwareList.find(sensor.first) == controlHardwareList.end())
         {
             continue;
         }
-
+#ifdef _WIN32
         sensor.second = LHWM::GetSensorValue(sensor.first);
+#elif __linux__
+        QStringList idArray = QString::fromStdString(sensor.first).split('/', Qt::SkipEmptyParts);
+        if (idArray.count() != 3)
+        {
+            continue;
+        }
+        try {
+            sensor.second = (float)chips[idArray[0].toInt()].features()[idArray[1].toInt()].subfeatures()[idArray[2].toInt()].read();
+        }
+        catch (...) {}
+#endif
     }
 
     emit sensorsUpdated();
@@ -59,7 +103,7 @@ void HardwareMonitor::updateSensors()
 
 void HardwareMonitor::startAutoUpdate(int intervalMs)
 {
-    if(updateTimer)
+    if(!updateTimer)
     {
         updateTimer = new QTimer();
         QObject::connect(updateTimer, &QTimer::timeout, this, QOverload<>::of(&HardwareMonitor::updateSensors));
@@ -80,6 +124,18 @@ void HardwareMonitor::setControlValue(std::string identifier, float value)
 {
     if (sensorValue[identifier] != value || value == 0)
     {
+#ifdef _WIN32
         LHWM::SetControlValue(identifier, value);
+#elif __linux__
+        QStringList idArray = QString::fromStdString(identifier).split('/', Qt::SkipEmptyParts);
+        if (idArray.count() != 3)
+        {
+            return;
+        }
+        try {
+            chips[idArray[0].toInt()].features()[idArray[0].toInt()].subfeatures()[idArray[0].toInt()].write(value);
+        }
+        catch (...) {}
+#endif
     }
 }

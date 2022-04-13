@@ -6,16 +6,10 @@ QT +=                  \
 
 win32:CONFIG += QTPLUGIN
 
-QMAKE_CXXFLAGS += /bigobj
-
 TEMPLATE = lib
 DEFINES += ORGBFANSYNCPLUGIN_LIBRARY
 
 win32:CONFIG += c++17
-
-unix:!macx {
-  QMAKE_CXXFLAGS += -std=c++17
-}
 
 #-----------------------------------------------------------------------------------------------#
 # Application Configuration                                                                     #
@@ -51,7 +45,6 @@ INCLUDEPATH +=                                                                  
     OpenRGB/RGBController                                                                       \
     OpenRGB/dependencies/json                                                                   \
     OpenRGB/net_port                                                                            \
-    OpenRGB/dependencies/json                                                                   \
     dependencies/exprtk                                                                         \
     dependencies/qcustomplot                                                                    \
 
@@ -63,7 +56,7 @@ HEADERS +=                                                                      
     OpenRGB/ResourceManager.h                                                                   \
     OpenRGB/dependencies/json/json.hpp                                                          \
     OpenRGB/qt/TabLabel.h                                                                       \
-    Settings.h \
+    Settings.h                                                                                  \
     dependencies/exprtk/exprtk.hpp                                                              \
     dependencies/qcustomplot/qcustomplot.h                                                      \
     OpenRGBFanSyncPlugin.h                                                                      \
@@ -121,6 +114,7 @@ win32:{
     INCLUDEPATH += dependencies/lhwm-cpp-wrapper
     DEPENDPATH += dependencies/lhwm-cpp-wrapper
     HEADERS += dependencies/lhwm-cpp-wrapper/lhwm-cpp-wrapper.h
+    QMAKE_CXXFLAGS += /bigobj
 }
 
 win32:CONFIG(debug, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
@@ -130,6 +124,27 @@ win32:CONFIG(debug, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
 win32:CONFIG(release, debug|release):contains(QMAKE_TARGET.arch, x86_64) {
     LIBS += -L$$PWD/dependencies/lhwm-cpp-wrapper/x64/Release -llhwm-cpp-wrapper
 }
+
+#-----------------------------------------------------------------------#
+# Linux-specific Configuration                                          #
+#-----------------------------------------------------------------------#
+unix:!macx {
+
+    INCLUDEPATH +=                                                      \
+        dependencies/libsensors-cpp                                     \
+
+    HEADERS +=                                                          \
+        dependencies/libsensors-cpp/sensors.h                           \
+        dependencies/libsensors-cpp/error.h                             \
+
+    SOURCES +=                                                          \
+        dependencies/libsensors-cpp/sensors.cpp                         \
+        dependencies/libsensors-cpp/error.cpp                           \
+
+    LIBS += -lsensors -lstdc++fs
+    QMAKE_CXXFLAGS += -std=c++17
+}
+
 
 
 RESOURCES += \

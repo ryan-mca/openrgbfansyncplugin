@@ -42,28 +42,27 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
     sensorDropdown->addItem("Select Sensor");
     sensorDropdown->setItemData(0, false, Qt::UserRole -1);
 
-//    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->sensorList)
-//    {
-//        sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
-//        QString sensorIdentifierQstring = QString::fromStdString(sensorIdentifier);
-//        QString sensorNameQstring = QString::fromStdString(sensorName);
-//        sensorDropdown->addItem(sensorNameQstring, sensorIdentifierQstring);
-//    }
-
-    for (const auto& [hardwareName, type] : hardwareMonitor->sensorListHierarchy)
+    for (const auto& [sensorIdentifier, sensorName] : hardwareMonitor->sensorList)
     {
-        sensorDropdown->addItem(QString::fromStdString(hardwareName));
-        sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
-        for (const auto& [typeName, sensor] : type)
-        {
-            sensorDropdown->addItem(" " + QString::fromStdString(typeName));
-            sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
-            for (const auto& [sensorName, sensorIdentifier] : sensor)
-            {
-                sensorDropdown->addItem("    " + QString::fromStdString(sensorName), QString::fromStdString(sensorIdentifier));
-            }
-        }
+        QString sensorIdentifierQstring = QString::fromStdString(sensorIdentifier);
+        QString sensorNameQstring = QString::fromStdString(sensorName);
+        sensorDropdown->addItem(sensorNameQstring, sensorIdentifierQstring);
     }
+
+//    for (const auto& [hardwareName, type] : hardwareMonitor->sensorListHierarchy)
+//    {
+//        sensorDropdown->addItem(QString::fromStdString(hardwareName));
+//        sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
+//        for (const auto& [typeName, sensor] : type)
+//        {
+//            sensorDropdown->addItem(" " + QString::fromStdString(typeName));
+//            sensorDropdown->setItemData(sensorDropdown->count() - 1, false, Qt::UserRole -1);
+//            for (const auto& [sensorName, sensorIdentifier] : sensor)
+//            {
+//                sensorDropdown->addItem("    " + QString::fromStdString(sensorName), QString::fromStdString(sensorIdentifier));
+//            }
+//        }
+//    }
 
 
     hardwareDropdownLayout->addWidget(sensorDropdown, 3);

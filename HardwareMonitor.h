@@ -22,13 +22,23 @@
 #include <QTimer>
 #include <unordered_set>
 
+#ifdef _WIN32
 #include <lhwm-cpp-wrapper.h>
+#elif __linux__
+#include <sensors.h>
+#endif
+
 
 class HardwareMonitor : public QObject
 {
 Q_OBJECT
 private:
     QTimer *updateTimer;
+
+#ifdef __linux__
+std::vector<sensors::chip_name> chips;
+#endif
+
 
 public:
     /// <summary>
