@@ -33,7 +33,7 @@ class HardwareMonitor : public QObject
 {
 Q_OBJECT
 private:
-    QTimer *updateTimer;
+    QTimer *updateTimer {};
 
 #ifdef __linux__
 std::vector<sensors::chip_name> chips;
