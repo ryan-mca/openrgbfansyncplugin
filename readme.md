@@ -18,6 +18,9 @@ Notice: some of the hardware measures may require that you run OpenRGB as admin.
 
 This version of the of the lhwm-wrapper is compatible with [OpenRGBHardwareSyncPlugin](https://gitlab.com/OpenRGBDevelopers/OpenRGBHardwareSyncPlugin) so only this file is needed if using both plugins.
 
+## Linux Support
+Linux support has been added using lm-sensors but I wasn't able to fully test it so I disabled the pipeline build, if you want to try it you can download and compile the code manually.
+
 ## Usage & Features
 * After installing the plugin go to the Hardware Fan Sync tab in OpenRGB
 * List of available fans/controls is visible on the left, right-click tab to hide unused fans
