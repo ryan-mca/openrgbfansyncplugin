@@ -51,6 +51,7 @@ private:
     QLabel *measureFunctionResultLabel;
     QLineEdit *minValueText;
     QLineEdit *maxValueText;
+    QLabel *currentFanDutyCycle;
     QLabel *currentFanSpeed;
     QButtonGroup *fanPresetButtonGroup;
 

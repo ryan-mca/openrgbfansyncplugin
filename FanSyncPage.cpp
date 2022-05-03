@@ -157,7 +157,9 @@ FanSyncPage::FanSyncPage(std::string cIdentifier, HardwareMonitor *hMonitor, QWi
 
     QObject::connect(fanPresetButtonGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked), this, &FanSyncPage::setFanPreset);
 
-    currentFanSpeed = new QLabel("Fan Speed: " + QString::number(hardwareMonitor->sensorValue[controlIdentifier]) + "%");
+    currentFanDutyCycle = new QLabel("Fan Duty Cycle: " + QString::number(hardwareMonitor->sensorValue[controlIdentifier]) + "%");
+    fanPresetLayout->addWidget(currentFanDutyCycle);
+    currentFanSpeed = new QLabel("Fan Speed: 0 RPM");
     fanPresetLayout->addWidget(currentFanSpeed);
     fanPresetLayout->addStretch();
 
@@ -351,7 +353,9 @@ void FanSyncPage::updateControl()
         {
             selectedSensorValueLabel->setText("(" + QString::number(hardwareMonitor->sensorValue[sensorDropdown->currentData().toString().toStdString()]) + ")");
         }
-        currentFanSpeed->setText("Fan Speed: " + QString::number(currentFanControlSpeed) + "%");
+        currentFanDutyCycle->setText("Fan Duty Cycle: " + QString::number(std::ceil(currentFanControlSpeed)) + "%");
+
+        currentFanSpeed->setText("Fan Speed: " + QString::number(std::ceil(hardwareMonitor->sensorValue[QString::fromStdString(controlIdentifier).replace("/control/", "/fan/").toStdString()])) + " RPM");
     }
 
     if (!measureFunctionExpression)
