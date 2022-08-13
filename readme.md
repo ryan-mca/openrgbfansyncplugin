@@ -12,7 +12,7 @@ This plugin was inspired by [OpenRGBHardwareSyncPlugin](https://gitlab.com/OpenR
 
 ## Install
 
-Download and place [lhwm-wrapper.dll](https://gitlab.com/ShadyNawara/openrgbfansyncplugin/-/blob/master/dependencies/lhwm-cpp-wrapper/x64/Release/lhwm-wrapper.dll)  ([source](https://gitlab.com/ShadyNawara/lhwm-wrapper)) in the directory of `OpenRGB.exe`.
+Download and place [lhwm-wrapper.dll](https://gitlab.com/OpenRGBDevelopers/lhwm-wrapper/-/jobs/artifacts/master/download?job=main_build)  ([source](https://gitlab.com/OpenRGBDevelopers/lhwm-wrapper)) in the directory of `OpenRGB.exe`.
 
 Notice: some of the hardware measures may require that you run OpenRGB as admin.
 
