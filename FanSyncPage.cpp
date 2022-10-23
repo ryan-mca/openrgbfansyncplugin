@@ -418,7 +418,7 @@ void FanSyncPage::updateControl()
             }
         }
 
-        if (fanSpeed > currentFanControlSpeed + 2 || fanSpeed < currentFanControlSpeed - 2)
+        if (fanSpeed > currentFanControlSpeed + 2 || fanSpeed < currentFanControlSpeed - 2 || currentFanControlSpeed == 0)
         {
             hardwareMonitor->setControlValue(controlIdentifier, fanSpeed);
         }
