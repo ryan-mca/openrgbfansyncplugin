@@ -40,7 +40,17 @@ FanSyncWidget::FanSyncWidget(HardwareMonitor *hardwareMonitor, QWidget *parent)
 
             this->addTab(page, "");
 
-            QString labelString = QString::fromStdString(controlName);
+            QString labelString;
+            auto controlNamesIt = controlNames.find(controlIdentifier);
+            if (controlNamesIt != controlNames.end())
+            {
+                labelString = QString::fromStdString(controlNamesIt->second);
+            }
+            else
+            {
+                labelString = QString::fromStdString(controlName);
+            }
+
             Ui::TabLabel* tabLabel = new Ui::TabLabel("fan" + QString::fromStdString(OpenRGBFanSyncPlugin::DarkTheme ? "_dark" : ""), labelString);
 
             int tabIndex = this->tabBar()->count() - 1;
@@ -71,6 +81,8 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
     int tabIndex = this->tabBar()->tabAt(pos);
 
     QMenu tabMenu;
+
+    tabMenu.addAction("Rename");
 
     if (hiddenControls.size() < this->tabBar()->count() - 1)
     {
@@ -112,12 +124,29 @@ void FanSyncWidget::tabBarContextMenuRequested(const QPoint& pos)
 
         saveSettings();
     }
+    else if (selectedItem && selectedItem->text() == "Rename")
+    {
+        bool inputOk;
+        QString text = QInputDialog::getText(this, tr("Rename Control"), tr("Control name:"), QLineEdit::Normal, "", &inputOk);
+        if (inputOk && !text.isEmpty()) {
+            Ui::TabLabel* tabLabel = new Ui::TabLabel("fan" + QString::fromStdString(OpenRGBFanSyncPlugin::DarkTheme ? "_dark" : ""), text);
+
+            this->tabBar()->setTabButton(tabIndex, QTabBar::LeftSide, tabLabel);
+            controlNames[this->tabBar()->tabData(tabIndex).toString().toStdString()] = text.toStdString();
+
+            this->tabBar()->update();
+
+            saveSettings();
+        }
+    }
 }
 
 void FanSyncWidget::saveSettings()
 {
-    json value(hiddenControls);
-    Settings::Save("hiddenControls", value);
+    json hiddenControlsJson(hiddenControls);
+    json controlNamesJson(controlNames);
+    Settings::Save("hiddenControls", hiddenControlsJson);
+    Settings::Save("controlNames", controlNamesJson);
 }
 
 void FanSyncWidget::loadSettings()
@@ -126,5 +155,11 @@ void FanSyncWidget::loadSettings()
     if (hiddenControlsJson.is_array())
     {
         hiddenControls = hiddenControlsJson.get<std::vector<std::string>>();
+    }
+
+    json controlNamesJson = Settings::Load("controlNames");
+    if (controlNamesJson.is_object())
+    {
+        controlNames = controlNamesJson.get<std::map<std::string, std::string>>();
     }
 }

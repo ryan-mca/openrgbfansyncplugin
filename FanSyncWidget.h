@@ -35,6 +35,7 @@ public:
 
 private:
     std::vector<std::string> hiddenControls;
+    std::map<std::string, std::string> controlNames;
     void saveSettings();
     void loadSettings();
 
