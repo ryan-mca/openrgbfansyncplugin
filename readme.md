@@ -1,3 +1,6 @@
+# THIS PROJECT IS NOW PART OF THE OPENRGBDEVELOPERS GROUP AND HAS A NEW URL: [OpenRGBDevelopers/OpenRGBFanSyncPlugin](https://gitlab.com/OpenRGBDevelopers/OpenRGBFanSyncPlugin)
+
+
 # OpenRGBFanSyncPlugin
 
 [![pipeline status](https://gitlab.com/ShadyNawara/openrgbfansyncplugin/badges/master/pipeline.svg)](https://gitlab.com/ShadyNawara/openrgbfansyncplugin/-/commits/master)
